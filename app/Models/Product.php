@@ -12,11 +12,19 @@ class Product extends Model
 
     protected $guarded = ['id'];
 
-    public function category() { return $this->belongsTo(Category::class); }
-    public function unit() { return $this->belongsTo(Unit::class); }
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+    
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
     public function warehouses()
     {
         return $this->belongsToMany(Warehouse::class, 'product_warehouse')
-                    ->withPivot('current_stock', 'total_value');
+            ->withPivot('current_stock', 'total_value');
     }
 }

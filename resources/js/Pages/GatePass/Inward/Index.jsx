@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 
 export default function InwardIndex({ gatePasses, filters, suppliers }) {
   const statusColors = {
@@ -39,7 +40,7 @@ export default function InwardIndex({ gatePasses, filters, suppliers }) {
   }
 
   return (
-    <>
+    <AuthenticatedLayout>
       <Head title="Inward Gate Passes" />
 
       <div className="space-y-6">
@@ -196,6 +197,6 @@ export default function InwardIndex({ gatePasses, filters, suppliers }) {
         {/* Built-in Pagination */}
         <Pagination links={gatePasses.links} />
       </div>
-    </>
+    </AuthenticatedLayout>
   )
 }

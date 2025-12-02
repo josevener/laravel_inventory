@@ -43,7 +43,7 @@ export function AppSidebar({ ...props }) {
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, permission: "view dashboard" },
     { title: "Products", url: "/products", icon: Package, permission: "manage products" },
     { title: "Inward Gate Pass", url: "/gatepass/inward", icon: Truck, badge: "IN", permission: "view inward gatepass" },
-    { title: "Outward Gate Pass", url: "/gatepass/outward/create", icon: Truck, badge: "OUT", permission: "create outward gatepass" },
+    { title: "Pull Out", url: "/pull_out", icon: Truck, permission: "create outward gatepass" },
     { title: "Stock Transfer", url: "/transfer", icon: ArrowLeftRight, permission: "manage stock transfer" },
     { title: "Stock Adjustment", url: "/adjustment", icon: AlertCircle, permission: "adjust stock" },
     {

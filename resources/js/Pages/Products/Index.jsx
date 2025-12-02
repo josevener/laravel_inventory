@@ -9,13 +9,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { router } from "@inertiajs/react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 
 export default function ProductsIndex({ products, warehouses }) {
   return (
-    <>
+    <AuthenticatedLayout>
       <Head title="Products & Stock" />
 
       <div className="space-y-6">
@@ -102,6 +104,26 @@ export default function ProductsIndex({ products, warehouses }) {
                             <Badge variant="default">In Stock</Badge>
                           )}
                         </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button variant="outline" size="sm" asChild>
+                              <Link href={`/products/${product.id}/edit`}>Edit</Link>
+                            </Button>
+
+                            <form
+                              onSubmit={(e) => {
+                                e.preventDefault()
+                                if (confirm("Are you sure you want to delete this product?")) {
+                                  router.delete(route("products.destroy", product.id))
+                                }
+                              }}
+                            >
+                              <Button variant="destructive" size="sm" type="submit">
+                                Delete
+                              </Button>
+                            </form>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     )
                   })}
@@ -111,6 +133,6 @@ export default function ProductsIndex({ products, warehouses }) {
           </CardContent>
         </Card>
       </div>
-    </>
+    </AuthenticatedLayout>
   )
 }

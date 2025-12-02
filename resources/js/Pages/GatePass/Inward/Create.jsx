@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Head, router } from "@inertiajs/react"
+import { router } from "@inertiajs/react"
 import { Truck, Plus, Trash2, Save, Search, Package } from "lucide-react"
 import axios from "axios"
 
@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 
 const formSchema = z.object({
   supplier_id: z.string().min(1, "Select a supplier"),
@@ -31,7 +32,7 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
   const [searchResults, setSearchResults] = useState([])
   const [searchLoading, setSearchLoading] = useState(false)
   const [selectedWarehouse, setSelectedWarehouse] = useState(null)
-  const [displayItems, setDisplayItems] = useState([]) // ← FIXED: Moved up!
+  const [displayItems, setDisplayItems] = useState([])
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -50,7 +51,7 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
   })
 
   useEffect(() => {
-    if (searchTerm.length < 2) {
+    if (searchTerm.length < 1) {
       setSearchResults([])
       return
     }
@@ -98,10 +99,12 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
   }
 
   return (
-    <>
-      <Head title="New Inward Gate Pass" />
-
-      <div className="max-w-6xl mx-auto space-y-8 py-8">
+    <AuthenticatedLayout 
+      breadCrumbLink={"/gatepass/inward"}
+      breadCrumbLinkText="Inward Gate Passes"
+      breadCrumbPage="New Inward Gate Pass"
+    >
+      <div className="w-full mx-auto space-y-8">
         <div className="flex items-center gap-4">
           <Truck className="h-12 w-12 text-primary" />
           <div>
@@ -284,6 +287,6 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
           </form>
         </Form>
       </div>
-    </>
+    </AuthenticatedLayout>
   )
 }
