@@ -23,7 +23,6 @@ class DatabaseSeeder extends Seeder
         ]);
         
          $this->call([
-            WarehouseSeeder::class,
             ProductSeeder::class,
             SupplierSeeder::class,
             UnitSeeder::class,

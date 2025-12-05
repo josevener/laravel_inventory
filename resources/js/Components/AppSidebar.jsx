@@ -51,14 +51,14 @@ export function AppSidebar({ ...props }) {
       items: [
         { title: "Categories", url: "/categories", permission: "manage products" },
         { title: "Suppliers", url: "/suppliers", permission: "manage products" },
-        { title: "Customers", url: "/customers", permission: "manage products" },
-        { title: "Warehouses", url: "/warehouses", permission: "manage warehouses" },
+        // { title: "Customers", url: "/customers", permission: "manage products" },
+        // { title: "Warehouses", url: "/warehouses", permission: "manage warehouses" },
         { title: "Units", url: "/units", permission: "manage products" },
       ],
     },
     { title: "Reports", url: "/reports", icon: FileText, permission: "view reports" },
     { title: "Users & Roles", url: "/users", icon: UserCheck, permission: "manage users" },
-    { title: "Settings", url: "/settings", icon: Settings, permission: "manage settings" },
+    // { title: "Settings", url: "/settings", icon: Settings, permission: "manage settings" },
   ].filter(item => {
     if (item.permission) return hasPermission(item.permission)
     if (item.items) return item.items.some(sub => hasPermission(sub.permission))

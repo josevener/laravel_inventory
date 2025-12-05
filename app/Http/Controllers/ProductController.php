@@ -49,7 +49,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'sku' => 'required|unique:products,sku',
+            'serial_no' => 'required|unique:products,sku',
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'unit_id' => 'required|exists:units,id',
@@ -76,7 +76,7 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'sku' => 'required|unique:products,sku,' . $product->id,
+            'serial_no' => 'required|unique:products,sku,' . $product->id,
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'unit_id' => 'required|exists:units,id',
@@ -105,26 +105,26 @@ class ProductController extends Controller
     {
         $query = Product::query()
             ->with('unit')
-            ->select('products.id', 'products.sku', 'products.name', 'products.reorder_level', 'unit_id')
-            ->where('sku', 'LIKE', "%{$request->q}%")
+            ->select('products.id', 'products.serial_no', 'products.name', 'products.reorder_level', 'unit_id')
+            ->where('serial_no', 'LIKE', "%{$request->q}%")
             ->orWhere('name', 'LIKE', "%{$request->q}%");
 
-        if ($request->filled('warehouse_id')) {
-            $query->addSelect([
-                'current_stock' => DB::table('product_warehouse')
-                    ->whereColumn('product_id', 'products.id')
-                    ->where('warehouse_id', $request->warehouse_id)
-                    ->select('current_stock')
-                    ->limit(1)
-            ]);
-        }
+        // if ($request->filled('warehouse_id')) {
+        //     $query->addSelect([
+        //         'current_stock' => DB::table('product_warehouse')
+        //             ->whereColumn('product_id', 'products.id')
+        //             ->where('warehouse_id', $request->warehouse_id)
+        //             ->select('current_stock')
+        //             ->limit(1)
+        //     ]);
+        // }
 
         $products = $query->limit(15)->get();
 
         return response()->json(
             $products->map(fn($p) => [
                 'id' => $p->id,
-                'sku' => $p->sku,
+                'serial_no' => $p->serial_no,
                 'name' => $p->name,
                 'unit_short' => $p->unit->short_name ?? 'Pc',
                 'current_stock' => (int) ($p->current_stock ?? 0),

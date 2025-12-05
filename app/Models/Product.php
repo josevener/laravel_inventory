@@ -10,13 +10,22 @@ class Product extends Model
     /** @use HasFactory<\Database\Factories\ProductFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'serial_no',
+        'code',
+        'name',
+        'category_id',
+        'unit_id',
+        'reorder_level',
+        'description',
+    ];
     protected $guarded = ['id'];
 
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
-    
+
     public function unit()
     {
         return $this->belongsTo(Unit::class);

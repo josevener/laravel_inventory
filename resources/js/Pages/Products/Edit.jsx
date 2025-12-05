@@ -10,7 +10,7 @@ import { ArrowLeft, Package } from "lucide-react"
 
 export default function Edit({ product, categories, units }) {
   const { data, setData, put, processing, errors } = useForm({
-    sku: product.sku || "",
+    serial_no: product.serial_no || "",
     name: product.name || "",
     category_id: product.category_id?.toString() || "",
     unit_id: product.unit_id?.toString() || "",
@@ -25,9 +25,9 @@ export default function Edit({ product, categories, units }) {
 
   return (
     <AuthenticatedLayout
-      breadCrumbLink="/products"
-      breadCrumbLinkText="Products"
-      breadCrumbPage="Edit Product"
+      // breadCrumbLink="/products"
+      // breadCrumbLinkText="Products"
+      // breadCrumbPage="Edit Product"
     >
       <Head title="Edit Product" />
 
@@ -56,7 +56,7 @@ export default function Edit({ product, categories, units }) {
           <div className="bg-muted/50 border rounded-lg p-4">
             <p className="text-sm text-muted-foreground">
               Editing: <span className="font-medium text-foreground">{product.name}</span> 
-              {" "}• SKU: <span className="font-mono">{product.sku}</span>
+              {" "}• Serial No.: <span className="font-mono">{product.serial_no}</span>
             </p>
           </div>
 
@@ -65,17 +65,17 @@ export default function Edit({ product, categories, units }) {
             {/* Left Column */}
             <div className="space-y-6">
               <div>
-                <Label htmlFor="sku">
-                  SKU <span className="text-destructive">*</span>
+                <Label htmlFor="serial_no">
+                  Serial No. <span className="text-destructive">*</span>
                 </Label>
                 <Input
-                  id="sku"
-                  value={data.sku}
-                  onChange={(e) => setData("sku", e.target.value)}
+                  id="serial_no"
+                  value={data.serial_no}
+                  onChange={(e) => setData("serial_no", e.target.value)}
                   placeholder="e.g. PROD-001"
                   className="mt-1.5 font-mono"
                 />
-                {errors.sku && <p className="text-sm text-destructive mt-1.5">{errors.sku}</p>}
+                {errors.serial_no && <p className="text-sm text-destructive mt-1.5">{errors.serial_no}</p>}
               </div>
 
               <div>

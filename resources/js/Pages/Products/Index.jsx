@@ -15,10 +15,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import DeleteConfirmDialog from "@/Components/custom/DeleteConfirmDialog"
+import { Input } from "@/Components/ui/input"
 
 export default function ProductsIndex({ products, warehouses }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deletingProduct, setDeletingProduct] = useState(null)
+  const [search, setSearch] = useState("");
 
   const openDeleteDialog = (product) => {
     setDeletingProduct(product)
@@ -51,15 +53,25 @@ export default function ProductsIndex({ products, warehouses }) {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Products & Stock</h1>
             <p className="text-muted-foreground">
-              Manage items and view real-time stock across warehouses
+              Manage items and view real-time stocks
             </p>
           </div>
-          <Button asChild>
-            <Link href={route("products.create")}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Product
-            </Link>
-          </Button>
+          <div className="flex justify-center items-center gap-2">
+            <Input 
+              type="text" 
+              name="search"
+              placeholder="Search name, serial no., or category..."
+              className="w-[300px]"
+              onChange={(e) => setSearch(e.target.value)} 
+            />
+
+            <Button asChild>
+              <Link href={route("products.create")}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Product
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Products Table */}
@@ -75,16 +87,9 @@ export default function ProductsIndex({ products, warehouses }) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>SKU / Name</TableHead>
+                    <TableHead>Serial No. / Name</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Unit</TableHead>
-                    {warehouses.map((wh) => (
-                      <TableHead key={wh.id} className="text-center">
-                        {wh.code}
-                        <br />
-                        <span className="text-xs text-muted-foreground">{wh.name}</span>
-                      </TableHead>
-                    ))}
                     <TableHead className="text-right">Total Stock</TableHead>
                     <TableHead className="text-center">Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -103,36 +108,12 @@ export default function ProductsIndex({ products, warehouses }) {
                       <TableRow key={product.id}>
                         <TableCell className="font-medium">
                           <div>
-                            <div className="font-mono text-sm font-semibold">{product.sku}</div>
+                            <div className="font-mono text-sm font-semibold">{product.serial_no}</div>
                             <div className="text-sm text-foreground">{product.name}</div>
                           </div>
                         </TableCell>
                         <TableCell>{product.category.name}</TableCell>
                         <TableCell>{product.unit.short_name}</TableCell>
-
-                        {warehouses.map((wh) => {
-                          const stock = product.warehouses.find((w) => w.id === wh.id)
-                          const qty = stock ? stock.pivot.current_stock : 0
-                          const isLowHere = qty > 0 && qty < product.reorder_level
-                          const isZero = qty === 0
-
-                          return (
-                            <TableCell key={wh.id} className="text-center">
-                              <span
-                                className={`font-medium ${
-                                  isZero
-                                    ? "text-destructive"
-                                    : isLowHere
-                                    ? "text-orange-600 dark:text-orange-400"
-                                    : "text-green-600 dark:text-green-400"
-                                }`}
-                              >
-                                {qty}
-                              </span>
-                            </TableCell>
-                          )
-                        })}
-
                         <TableCell className="text-right font-semibold">
                           {totalStock}
                         </TableCell>
@@ -152,10 +133,9 @@ export default function ProductsIndex({ products, warehouses }) {
 
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button variant="outline" size="sm" asChild>
+                            <Button variant="outline" size="sm" className="bg-blue-500 hover:bg-blue-600" asChild>
                               <Link href={route("products.edit", product.id)}>
-                                <Edit className="h-4 w-4 mr-1.5" />
-                                Edit
+                                <Edit className="h-4 w-4 text-white" />
                               </Link>
                             </Button>
 

@@ -10,7 +10,7 @@ import { ArrowLeft, Package } from "lucide-react"
 
 export default function Create({ categories, units }) {
   const { data, setData, post, processing, errors } = useForm({
-    sku: "",
+    serial_no: "",
     name: "",
     category_id: "",
     unit_id: "",
@@ -25,9 +25,9 @@ export default function Create({ categories, units }) {
 
   return (
     <AuthenticatedLayout
-      breadCrumbLink="/products"
-      breadCrumbLinkText="Products"
-      breadCrumbPage="New Product"
+      // breadCrumbLink="/products"
+      // breadCrumbLinkText="Products"
+      // breadCrumbPage="New Product"
     >
       <Head title="Create Product" />
 
@@ -58,16 +58,16 @@ export default function Create({ categories, units }) {
             <div className="space-y-6">
               <div>
                 <Label htmlFor="sku">
-                  SKU <span className="text-destructive">*</span>
+                  Serial No. <span className="text-destructive">*</span>
                 </Label>
                 <Input
-                  id="sku"
+                  id="serial_no"
                   value={data.sku}
-                  onChange={(e) => setData("sku", e.target.value)}
+                  onChange={(e) => setData("serial_no", e.target.value)}
                   placeholder="e.g. PROD-001"
                   className="mt-1.5"
                 />
-                {errors.sku && <p className="text-sm text-destructive mt-1.5">{errors.sku}</p>}
+                {errors.serial_no && <p className="text-sm text-destructive mt-1.5">{errors.serial_no}</p>}
               </div>
 
               <div>
