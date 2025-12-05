@@ -1,6 +1,7 @@
-import React from "react"
-import { Head, Link } from "@inertiajs/react"
-import { Plus, Package, AlertTriangle } from "lucide-react"
+// resources/js/Pages/Products/Index.jsx
+import React, { useState } from "react"
+import { Head, Link, router } from "@inertiajs/react"
+import { Plus, Package, AlertTriangle, Edit, Trash2 } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -9,31 +10,59 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { router } from "@inertiajs/react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
+import DeleteConfirmDialog from "@/Components/custom/DeleteConfirmDialog"
 
 export default function ProductsIndex({ products, warehouses }) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deletingProduct, setDeletingProduct] = useState(null)
+
+  const openDeleteDialog = (product) => {
+    setDeletingProduct(product)
+    setDeleteDialogOpen(true)
+  }
+
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false)
+    setDeletingProduct(null)
+  }
+
+  const handleDelete = () => {
+    if (!deletingProduct) return
+
+    router.delete(route("products.destroy", deletingProduct.id), {
+      onFinish: () => {
+        closeDeleteDialog()
+      },
+      preserveScroll: true,
+    })
+  }
+
   return (
     <AuthenticatedLayout>
       <Head title="Products & Stock" />
 
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Products & Stock</h1>
-            <p className="text-muted-foreground">Manage items and view real-time stock across warehouses</p>
+            <p className="text-muted-foreground">
+              Manage items and view real-time stock across warehouses
+            </p>
           </div>
           <Button asChild>
-            <Link href="/products/create">
+            <Link href={route("products.create")}>
               <Plus className="mr-2 h-4 w-4" />
               Add Product
             </Link>
           </Button>
         </div>
 
+        {/* Products Table */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -42,14 +71,14 @@ export default function ProductsIndex({ products, warehouses }) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="rounded-md border">
+            <div className="rounded-md border overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>SKU / Name</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Unit</TableHead>
-                    {warehouses.map(wh => (
+                    {warehouses.map((wh) => (
                       <TableHead key={wh.id} className="text-center">
                         {wh.code}
                         <br />
@@ -58,40 +87,56 @@ export default function ProductsIndex({ products, warehouses }) {
                     ))}
                     <TableHead className="text-right">Total Stock</TableHead>
                     <TableHead className="text-center">Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
+
                 <TableBody>
-                  {products.map(product => {
-                    const totalStock = product.warehouses.reduce((sum, w) => sum + w.pivot.current_stock, 0)
-                    const isLow = product.low_stock > 0
+                  {products.map((product) => {
+                    const totalStock = product.warehouses.reduce(
+                      (sum, w) => sum + w.pivot.current_stock,
+                      0
+                    )
+                    const isLow = totalStock > 0 && totalStock < product.reorder_level
 
                     return (
                       <TableRow key={product.id}>
                         <TableCell className="font-medium">
                           <div>
-                            <div className="font-semibold">{product.sku}</div>
-                            <div className="text-sm text-muted-foreground">{product.name}</div>
+                            <div className="font-mono text-sm font-semibold">{product.sku}</div>
+                            <div className="text-sm text-foreground">{product.name}</div>
                           </div>
                         </TableCell>
                         <TableCell>{product.category.name}</TableCell>
                         <TableCell>{product.unit.short_name}</TableCell>
-                        {warehouses.map(wh => {
-                          const stock = product.warehouses.find(w => w.id === wh.id)
+
+                        {warehouses.map((wh) => {
+                          const stock = product.warehouses.find((w) => w.id === wh.id)
                           const qty = stock ? stock.pivot.current_stock : 0
-                          const isLowHere = qty < product.reorder_level && qty > 0
+                          const isLowHere = qty > 0 && qty < product.reorder_level
                           const isZero = qty === 0
 
                           return (
                             <TableCell key={wh.id} className="text-center">
-                              <span className={`font-medium ${isZero ? "text-destructive" : isLowHere ? "text-orange-600" : "text-green-600"}`}>
+                              <span
+                                className={`font-medium ${
+                                  isZero
+                                    ? "text-destructive"
+                                    : isLowHere
+                                    ? "text-orange-600 dark:text-orange-400"
+                                    : "text-green-600 dark:text-green-400"
+                                }`}
+                              >
                                 {qty}
                               </span>
                             </TableCell>
                           )
                         })}
+
                         <TableCell className="text-right font-semibold">
                           {totalStock}
                         </TableCell>
+
                         <TableCell className="text-center">
                           {isLow ? (
                             <Badge variant="destructive" className="flex items-center gap-1 w-fit mx-auto">
@@ -104,24 +149,23 @@ export default function ProductsIndex({ products, warehouses }) {
                             <Badge variant="default">In Stock</Badge>
                           )}
                         </TableCell>
+
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button variant="outline" size="sm" asChild>
-                              <Link href={`/products/${product.id}/edit`}>Edit</Link>
+                              <Link href={route("products.edit", product.id)}>
+                                <Edit className="h-4 w-4 mr-1.5" />
+                                Edit
+                              </Link>
                             </Button>
 
-                            <form
-                              onSubmit={(e) => {
-                                e.preventDefault()
-                                if (confirm("Are you sure you want to delete this product?")) {
-                                  router.delete(route("products.destroy", product.id))
-                                }
-                              }}
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => openDeleteDialog(product)}
                             >
-                              <Button variant="destructive" size="sm" type="submit">
-                                Delete
-                              </Button>
-                            </form>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -132,6 +176,18 @@ export default function ProductsIndex({ products, warehouses }) {
             </div>
           </CardContent>
         </Card>
+
+        {/* Reusable Delete Confirmation Modal */}
+        <DeleteConfirmDialog
+          isOpen={deleteDialogOpen}
+          onClose={closeDeleteDialog}
+          onConfirm={handleDelete}
+          title="Delete Product"
+          description="This product will be permanently deleted along with all stock records across warehouses."
+          itemName={deletingProduct?.name}
+          confirmText="Delete Product"
+          isLoading={router.progress?.pending}
+        />
       </div>
     </AuthenticatedLayout>
   )

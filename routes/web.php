@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InwardGatePassController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -41,6 +43,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/gatepass/inward/create', [InwardGatePassController::class, 'create'])->name('gatepass.inward.create');
     Route::post('/gatepass/inward', [InwardGatePassController::class, 'store'])->name('gatepass.inward.store');
     Route::get('/gatepass/inward/{gatePass}/print', [InwardGatePassController::class, 'print'])->name('gatepass.inward.print');
+
+    Route::resource('categories', CategoryController::class);
+    Route::resource('suppliers', SupplierController::class);
 });
 
 Route::get('/gatepass/inward/print-payslip', [InwardGatePassController::class, 'printPayslipMonthly'])->name('gatepass.inward.printPayslipMonthly');

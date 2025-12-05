@@ -13,7 +13,7 @@ class SupplierSeeder extends Seeder
      */
     public function run(): void
     {
-        Supplier::create(['name' => 'Rajesh Traders', 'company_name' => 'Rajesh & Sons', 'phone' => '9876543210']);
-        Supplier::create(['name' => 'Shree Cement Ltd', 'company_name' => 'Shree Cement', 'gst_number' => '27AAECS1234H1Z5']);
+        Supplier::create(['code' => 'Rajesh Traders', 'name' => 'Rajesh Traders', 'company_name' => 'Rajesh & Sons', 'phone' => '9876543210']);
+        Supplier::create(['code' => 'Shree Cement Ltd', 'name' => 'Shree Cement Ltd', 'company_name' => 'Shree Cement', 'gst_number' => '27AAECS1234H1Z5']);
     }
 }

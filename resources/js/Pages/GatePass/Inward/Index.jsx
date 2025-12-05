@@ -1,7 +1,7 @@
 import React from "react"
 import { Head, Link, router } from "@inertiajs/react"
 import { format } from "date-fns"
-import { Truck, Search, Filter, Printer, Plus } from "lucide-react"
+import { Truck, Search, Filter, Printer, Plus, SquareArrowOutUpRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -135,6 +135,7 @@ export default function InwardIndex({ gatePasses, filters, suppliers }) {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead></TableHead>
                   <TableHead>Gate Pass No</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Supplier</TableHead>
@@ -142,7 +143,7 @@ export default function InwardIndex({ gatePasses, filters, suppliers }) {
                   <TableHead>Vehicle</TableHead>
                   <TableHead>Items</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Print</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -155,6 +156,7 @@ export default function InwardIndex({ gatePasses, filters, suppliers }) {
                 ) : (
                   gatePasses.data.map((gp) => (
                     <TableRow key={gp.id}>
+                      <TableCell><SquareArrowOutUpRight /></TableCell>
                       <TableCell className="font-mono font-bold text-primary">
                         {gp.gate_pass_no}
                       </TableCell>
@@ -184,6 +186,7 @@ export default function InwardIndex({ gatePasses, filters, suppliers }) {
                           }}
                         >
                           <Printer className="h-4 w-4" />
+                          Generate
                         </Button>
                       </TableCell>
                     </TableRow>

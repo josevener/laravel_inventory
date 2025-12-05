@@ -13,18 +13,20 @@ return new class extends Migration
     {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('code')->unique();                    // e.g. SUP-001
+            $table->string('name');                              // Contact person
             $table->string('company_name')->nullable();
-            $table->string('phone')->nullable();
+            $table->string('phone', 20)->nullable();
             $table->string('email')->nullable();
             $table->text('address')->nullable();
-            $table->string('gst_number')->nullable();
+            $table->string('gst_number', 20)->nullable();
             $table->boolean('is_active')->default(true);
+            $table->softDeletes();
             $table->timestamps();
 
-            // Indexes
             $table->index('name');
             $table->index('company_name');
+            $table->index('is_active');
         });
     }
 
