@@ -10,10 +10,11 @@ import { ArrowLeft, Package } from "lucide-react"
 
 export default function Create({ categories, units }) {
   const { data, setData, post, processing, errors } = useForm({
-    serial_no: "",
+    sku: "",
     name: "",
     category_id: "",
     unit_id: "",
+    current_stock: 0,
     reorder_level: 10,
     description: "",
   })
@@ -24,73 +25,60 @@ export default function Create({ categories, units }) {
   }
 
   return (
-    <AuthenticatedLayout
-      // breadCrumbLink="/products"
-      // breadCrumbLinkText="Products"
-      // breadCrumbPage="New Product"
-    >
+    <AuthenticatedLayout>
       <Head title="Create Product" />
 
       {/* Sticky Header */}
       <div className="sticky top-0 z-10 bg-background border-b">
         <div className="flex items-center justify-between py-4 px-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href={route("products.index")}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Products
-              </Link>
-            </Button>
-          </div>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href={route("products.index")}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Products
+            </Link>
+          </Button>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
             <Package className="h-6 w-6 text-primary" />
             Create New Product
           </h1>
-          <div className="w-[100px]" /> {/* Spacer for balance */}
+          <div className="w-[100px]" />
         </div>
       </div>
 
-      <div className="w-full mx-auto">
-        <form onSubmit={handleSubmit}>
-          {/* Main Form Content */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Left Column */}
+      <div className="max-w-5xl mx-auto">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left */}
             <div className="space-y-6">
               <div>
-                <Label htmlFor="sku">
-                  Serial No. <span className="text-destructive">*</span>
-                </Label>
+                <Label htmlFor="sku">SKU <span className="text-destructive">*</span></Label>
                 <Input
-                  id="serial_no"
+                  id="sku"
                   value={data.sku}
-                  onChange={(e) => setData("serial_no", e.target.value)}
-                  placeholder="e.g. PROD-001"
-                  className="mt-1.5"
+                  onChange={(e) => setData("sku", e.target.value.toUpperCase())}
+                  placeholder="e.g. CEM-001"
+                  className="mt-1.5 font-mono"
                 />
-                {errors.serial_no && <p className="text-sm text-destructive mt-1.5">{errors.serial_no}</p>}
+                {errors.sku && <p className="text-sm text-destructive mt-1.5">{errors.sku}</p>}
               </div>
 
               <div>
-                <Label htmlFor="name">
-                  Product Name <span className="text-destructive">*</span>
-                </Label>
+                <Label htmlFor="name">Product Name <span className="text-destructive">*</span></Label>
                 <Input
                   id="name"
                   value={data.name}
                   onChange={(e) => setData("name", e.target.value)}
-                  placeholder="e.g. Wireless Mouse"
+                  placeholder="e.g. OPC 53 Grade Cement"
                   className="mt-1.5"
                 />
                 {errors.name && <p className="text-sm text-destructive mt-1.5">{errors.name}</p>}
               </div>
 
               <div>
-                <Label>
-                  Category <span className="text-destructive">*</span>
-                </Label>
+                <Label>Category <span className="text-destructive">*</span></Label>
                 <Select value={data.category_id} onValueChange={(v) => setData("category_id", v)}>
                   <SelectTrigger className="mt-1.5">
-                    <SelectValue placeholder="Choose a category" />
+                    <SelectValue placeholder="Choose category" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
@@ -104,12 +92,10 @@ export default function Create({ categories, units }) {
               </div>
             </div>
 
-            {/* Right Column */}
+            {/* Right */}
             <div className="space-y-6">
               <div>
-                <Label>
-                  Unit <span className="text-destructive">*</span>
-                </Label>
+                <Label>Unit <span className="text-destructive">*</span></Label>
                 <Select value={data.unit_id} onValueChange={(v) => setData("unit_id", v)}>
                   <SelectTrigger className="mt-1.5">
                     <SelectValue placeholder="Select unit" />
@@ -126,9 +112,19 @@ export default function Create({ categories, units }) {
               </div>
 
               <div>
-                <Label htmlFor="reorder_level">
-                  Reorder Level <span className="text-destructive">*</span>
-                </Label>
+                <Label htmlFor="current_stock">Initial Stock</Label>
+                <Input
+                  id="current_stock"
+                  type="number"
+                  min="0"
+                  value={data.current_stock}
+                  onChange={(e) => setData("current_stock", e.target.value)}
+                  className="mt-1.5"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="reorder_level">Reorder Level <span className="text-destructive">*</span></Label>
                 <Input
                   id="reorder_level"
                   type="number"
@@ -138,17 +134,17 @@ export default function Create({ categories, units }) {
                   className="mt-1.5"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Notify when stock falls below this number
+                  Alert when stock falls below this number
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="description">Description <span className="text-muted-foreground">(Optional)</span></Label>
+                <Label htmlFor="description">Description (Optional)</Label>
                 <Textarea
                   id="description"
                   value={data.description}
                   onChange={(e) => setData("description", e.target.value)}
-                  placeholder="Add any additional details about this product..."
+                  placeholder="Add details..."
                   rows={5}
                   className="mt-1.5 resize-none"
                 />
@@ -156,30 +152,17 @@ export default function Create({ categories, units }) {
             </div>
           </div>
 
-          {/* Sticky Action Bar - Always Visible */}
+          {/* Fixed Bottom Bar */}
           <div className="fixed bottom-0 left-0 right-0 bg-background border-t">
             <div className="max-w-5xl mx-auto px-6 py-4 flex justify-end gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                asChild
-                size="lg"
-                className="min-w-[120px]"
-              >
+              <Button type="button" variant="outline" size="lg" asChild>
                 <Link href={route("products.index")}>Cancel</Link>
               </Button>
-              <Button
-                type="submit"
-                size="lg"
-                disabled={processing}
-                className="min-w-[160px]"
-              >
+              <Button type="submit" size="lg" disabled={processing}>
                 {processing ? "Creating..." : "Create Product"}
               </Button>
             </div>
           </div>
-
-          {/* Bottom padding to prevent content from being hidden under fixed bar */}
           <div className="h-28" />
         </form>
       </div>

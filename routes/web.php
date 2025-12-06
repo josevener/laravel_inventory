@@ -1,12 +1,13 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductSerialController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InwardGatePassController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\SupplierController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -42,13 +43,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/gatepass/inward',[ InwardGatePassController::class, 'index'] )->name('gatepass.inward.index');
     Route::get('/gatepass/inward/create', [InwardGatePassController::class, 'create'])->name('gatepass.inward.create');
     Route::post('/gatepass/inward', [InwardGatePassController::class, 'store'])->name('gatepass.inward.store');
-    Route::get('/gatepass/inward/{gatePass}/print', [InwardGatePassController::class, 'print'])->name('gatepass.inward.print');
+    Route::get('/gatepass/inward/{gatepass}/print_gatepass', [InwardGatePassController::class, 'print_gatepass'])->name('gatepass.inward.print_gatepass');
 
     Route::resource('categories', CategoryController::class);
-    Route::resource('suppliers', SupplierController::class);
+    Route::resource('projects', ProjectController::class);
+
+    Route::post('/product-serials', [ProductSerialController::class, 'store'])->name('product-serials.store');
+    Route::delete('/product-serials/{serial}', [ProductSerialController::class, 'destroy'])->name('product-serials.destroy');
+
 });
 
 Route::get('/gatepass/inward/print-payslip', [InwardGatePassController::class, 'printPayslipMonthly'])->name('gatepass.inward.printPayslipMonthly');
 Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
 Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
+
 require __DIR__.'/auth.php';

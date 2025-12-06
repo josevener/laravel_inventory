@@ -7,22 +7,23 @@ import { Textarea } from "@/components/ui/textarea"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { ArrowLeft } from "lucide-react"
 import { Link } from "@inertiajs/react"
+import { Card, CardContent } from "@/components/ui/card"
 
-export default function Edit() {
-  const { data, setData, post, processing, errors } = useForm({
-    code: "",
-    name: "",
-    description: "",
+export default function Edit({ category }) {
+  const { data, setData, put, processing, errors } = useForm({
+    code: category.code || "",
+    name: category.name || "",
+    description: category.description || "",
   })
 
   const submit = (e) => {
     e.preventDefault()
-    post(route("categories.update"))
+    put(route("categories.update", category.id))
   }
 
   return (
     <AuthenticatedLayout>
-      <div className="max-w-2xl mx-auto space-y-8 py-8">
+      <div className="w-full mx-auto space-y-8">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" asChild>
             <Link href={route("categories.index")}>
@@ -33,7 +34,7 @@ export default function Edit() {
           <h1 className="text-3xl font-bold">Edit Category</h1>
         </div>
 
-        <Card>
+        <Card className="max-w-2xl">
           <CardContent className="pt-6">
             <form onSubmit={submit} className="space-y-6">
               <div>

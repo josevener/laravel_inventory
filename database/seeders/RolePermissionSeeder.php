@@ -23,7 +23,7 @@ class RolePermissionSeeder extends Seeder
             'view dashboard',
             'manage products',
             'manage categories',
-            'manage suppliers',
+            'manage projects',
             'manage customers',
             'manage warehouses',
             'create inward gatepass',

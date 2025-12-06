@@ -3,38 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Warehouse;
+use App\Models\ProductSerial;
 use App\Models\Category;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with(['category', 'unit'])
-            ->with(['warehouses' => fn($q) => $q->withPivot('current_stock')])
-            ->withCount([
-                'warehouses as low_stock_count' => fn($q) =>
-                $q->whereColumn('product_warehouse.current_stock', '<', 'products.reorder_level')
-            ])
-            ->addSelect([
-                'total_stock' => DB::table('product_warehouse')
-                    ->whereColumn('product_id', 'products.id')
-                    ->selectRaw('COALESCE(SUM(current_stock), 0)')
-            ])
-            ->orderBy('total_stock')
-            ->get();
-
-        $warehouses = Warehouse::where('is_active', true)
-            ->select('id', 'name', 'code')
+        $products = Product::with(['category', 'unit', 'serials'])
+            ->orderBy('name')
             ->get();
 
         return Inertia::render('Products/Index', [
-            'products' => $products,
-            'warehouses' => $warehouses,
+            'products' => $products
         ]);
     }
 
@@ -49,11 +33,14 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'serial_no' => 'required|unique:products,sku',
+            'sku' => 'required|string|max:50|unique:products,sku',
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'unit_id' => 'required|exists:units,id',
+            'current_stock' => 'required|integer|min:0',
             'reorder_level' => 'required|integer|min:0',
+            'cost_price' => 'nullable|numeric|min:0',
+            'selling_price' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
         ]);
 
@@ -62,25 +49,37 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
 
+    public function show(Product $product)
+    {
+        $product->load(['category', 'unit', 'serials']);
+
+        return Inertia::render('Products/Show', [
+            'product' => $product
+        ]);
+    }
+
     public function edit(Product $product)
     {
         $product->load(['category', 'unit']);
 
         return Inertia::render('Products/Edit', [
             'product' => $product,
-            'categories' => Category::all(['id', 'name']),
-            'units' => Unit::all(['id', 'name', 'short_name']),
+            'categories' => Category::select('id', 'name')->get(),
+            'units' => Unit::select('id', 'name', 'short_name')->get(),
         ]);
     }
 
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'serial_no' => 'required|unique:products,sku,' . $product->id,
+            'sku' => 'required|string|max:50|unique:products,sku,' . $product->id,
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'unit_id' => 'required|exists:units,id',
+            'current_stock' => 'required|integer|min:0',
             'reorder_level' => 'required|integer|min:0',
+            'cost_price' => 'nullable|numeric|min:0',
+            'selling_price' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
         ]);
 
@@ -91,11 +90,6 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        // Optional: Prevent delete if stock exists or used in gatepasses
-        // if ($product->warehouses()->sum('pivot.current_stock') > 0) {
-        //     return back()->with('error', 'Cannot delete product with stock.');
-        // }
-
         $product->delete();
 
         return redirect()->route('products.index')->with('success', 'Product deleted.');
@@ -105,8 +99,8 @@ class ProductController extends Controller
     {
         $query = Product::query()
             ->with('unit')
-            ->select('products.id', 'products.serial_no', 'products.name', 'products.reorder_level', 'unit_id')
-            ->where('serial_no', 'LIKE', "%{$request->q}%")
+            ->select('products.id', 'products.sku', 'products.name', 'products.reorder_level', 'unit_id')
+            ->where('sku', 'LIKE', "%{$request->q}%")
             ->orWhere('name', 'LIKE', "%{$request->q}%");
 
         // if ($request->filled('warehouse_id')) {
@@ -124,7 +118,7 @@ class ProductController extends Controller
         return response()->json(
             $products->map(fn($p) => [
                 'id' => $p->id,
-                'serial_no' => $p->serial_no,
+                'sku' => $p->sku,
                 'name' => $p->name,
                 'unit_short' => $p->unit->short_name ?? 'Pc',
                 'current_stock' => (int) ($p->current_stock ?? 0),

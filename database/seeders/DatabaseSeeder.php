@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
         
          $this->call([
             ProductSeeder::class,
-            SupplierSeeder::class,
+            ProjectSeeder::class,
             UnitSeeder::class,
             InwardGatePassSeeder::class,
             InwardGatePassItemSeeder::class,

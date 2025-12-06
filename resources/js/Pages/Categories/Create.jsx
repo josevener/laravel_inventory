@@ -22,7 +22,7 @@ export default function Create() {
 
   return (
     <AuthenticatedLayout>
-      <div className="w-full mx-auto space-y-8 py-8">
+      <div className="w-full mx-auto space-y-8">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" asChild>
             <Link href={route("categories.index")}>

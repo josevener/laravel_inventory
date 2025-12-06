@@ -13,19 +13,22 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('serial_no')->unique();
+            $table->string('sku')->unique();
             $table->string('name');
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->foreignId('unit_id')->constrained('units')->onDelete('cascade');
+            $table->integer('current_stock')->default(0);
+            $table->integer('reorder_level')->default(10);
             $table->decimal('cost_price', 12, 2)->default(0);
             $table->decimal('selling_price', 12, 2)->default(0);
-            $table->integer('reorder_level')->default(10);
             $table->text('description')->nullable();
+            $table->softDeletes();
             $table->timestamps();
 
             // Indexes
             $table->index('name');
             $table->index('category_id');
+            $table->index('current_stock');
         });
     }
 
@@ -34,12 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Disable foreign key checks to avoid constraint errors
-        Schema::disableForeignKeyConstraints();
-
         Schema::dropIfExists('products');
-
-        // Re-enable foreign key checks
-        Schema::enableForeignKeyConstraints();
     }
 };

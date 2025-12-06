@@ -17,8 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 
 const formSchema = z.object({
-  supplier_id: z.string().min(1, "Select a supplier"),
-  warehouse_id: z.string().min(1, "Select warehouse"),
+  project_id: z.string().min(1, "Select a Project"),
   vehicle_no: z.string().min(3, "Enter vehicle number"),
   driver_name: z.string().optional(),
   items: z.array(z.object({
@@ -27,18 +26,16 @@ const formSchema = z.object({
   })).min(1, "Add at least one item"),
 })
 
-export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
+export default function InwardCreate({ projects, nextNumber }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [searchResults, setSearchResults] = useState([])
   const [searchLoading, setSearchLoading] = useState(false)
-  const [selectedWarehouse, setSelectedWarehouse] = useState(null)
   const [displayItems, setDisplayItems] = useState([])
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      supplier_id: "",
-      warehouse_id: "",
+      project_id: "",
       vehicle_no: "",
       driver_name: "",
       items: [],
@@ -50,6 +47,7 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
     name: "items",
   })
 
+  // Search products (no warehouse filter)
   useEffect(() => {
     if (searchTerm.length < 1) {
       setSearchResults([])
@@ -60,18 +58,20 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
       setSearchLoading(true)
       try {
         const res = await axios.get("/products/search", {
-          params: { q: searchTerm, warehouse_id: selectedWarehouse }
+          params: { q: searchTerm }
         })
         setSearchResults(res.data)
-      } catch (err) {
+      } 
+      catch (err) {
         console.error("Search failed:", err)
-      } finally {
+      } 
+      finally {
         setSearchLoading(false)
       }
-    }, 300)
+    }, 400)
 
     return () => clearTimeout(timer)
-  }, [searchTerm, selectedWarehouse])
+  }, [searchTerm])
 
   const addProduct = (product) => {
     const exists = fields.some(f => f.product_id === product.id.toString())
@@ -94,22 +94,24 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
       onSuccess: () => {
         form.reset()
         setDisplayItems([])
-      }
+      },
+      preserveScroll: true,
     })
   }
 
   return (
-    <AuthenticatedLayout 
-      breadCrumbLink={"/gatepass/inward"}
+    <AuthenticatedLayout
+      breadCrumbLink="/gatepass/inward"
       breadCrumbLinkText="Inward Gate Passes"
       breadCrumbPage="New Inward Gate Pass"
     >
-      <div className="w-full mx-auto space-y-8">
-        <div className="flex items-center gap-4">
-          <Truck className="h-12 w-12 text-primary" />
+      <div className="w-full mx-auto space-y-8 py-6">
+        {/* Header */}
+        <div className="flex items-center gap-6">
+          <Truck className="h-14 w-14 text-primary" />
           <div>
             <h1 className="text-4xl font-bold">Inward Gate Pass</h1>
-            <p className="text-2xl text-muted-foreground font-mono">
+            <p className="text-2xl text-muted-foreground font-mono mt-1">
               No: <span className="text-primary font-bold">{nextNumber}</span>
             </p>
           </div>
@@ -118,57 +120,66 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <FormField control={form.control} name="supplier_id" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Supplier</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="Choose supplier" /></SelectTrigger></FormControl>
-                    <SelectContent>
-                      {suppliers.map(s => (
-                        <SelectItem key={s.id} value={s.id.toString()}>
-                          {s.company_name || s.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )} />
+            {/* Project & Vehicle Info */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <FormField
+                control={form.control}
+                name="project_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose Project" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {projects.map(s => (
+                          <SelectItem key={s.id} value={s.id.toString()}>
+                            {s.company_name || s.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <FormField control={form.control} name="warehouse_id" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Receiving Warehouse</FormLabel>
-                  <Select onValueChange={(v) => { field.onChange(v); setSelectedWarehouse(v) }} value={field.value}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="Select warehouse" /></SelectTrigger></FormControl>
-                    <SelectContent>
-                      {warehouses.map(w => (
-                        <SelectItem key={w.id} value={w.id.toString()}>
-                          {w.name} ({w.code})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )} />
+              <FormField
+                control={form.control}
+                name="vehicle_no"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Vehicle Number *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="MH14 AB 1234"
+                        className="uppercase font-mono"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <FormField control={form.control} name="vehicle_no" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Vehicle Number</FormLabel>
-                  <FormControl><Input placeholder="MH14 AB 1234" className="uppercase" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-
-              <FormField control={form.control} name="driver_name" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Driver Name (Optional)</FormLabel>
-                  <FormControl><Input placeholder="Enter driver name" {...field} /></FormControl>
-                </FormItem>
-              )} />
+              <FormField
+                control={form.control}
+                name="driver_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Driver Name (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter driver name" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
 
+            {/* Search & Add Products */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -176,43 +187,47 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search by SKU or name..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
+                <div className="relative">
+                  <Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by SKU, name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
 
                 {searchLoading && (
-                  <div className="space-y-2">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 w-full" />
+                    ))}
                   </div>
                 )}
 
                 {searchResults.length > 0 && (
-                  <div className="border rounded-lg max-h-64 overflow-y-auto">
+                  <div className="border rounded-lg max-h-64 overflow-y-auto bg-background">
                     {searchResults.map(product => (
                       <div
                         key={product.id}
                         onClick={() => addProduct(product)}
-                        className="p-4 hover:bg-accent cursor-pointer border-b last:border-b-0 flex justify-between items-center"
+                        className="p-4 hover:bg-accent cursor-pointer border-b last:border-b-0 flex justify-between items-center transition-colors"
                       >
                         <div>
                           <div className="font-medium">{product.sku} - {product.name}</div>
                           <div className="text-sm text-muted-foreground">
-                            Stock: {product.current_stock} {product.unit_short}
-                            {product.current_stock < product.reorder_level && (
-                              <Badge variant="destructive" className="ml-2">Low</Badge>
+                            Current Stock: {product.current_stock} {product.unit_short}
+                            {product.current_stock < product.reorder_level && product.current_stock > 0 && (
+                              <Badge variant="destructive" className="ml-2 text-xs">Low Stock</Badge>
+                            )}
+                            {product.current_stock === 0 && (
+                              <Badge variant="secondary" className="ml-2 text-xs">Out of Stock</Badge>
                             )}
                           </div>
                         </div>
-                        <Button size="sm" variant="ghost"><Plus className="h-4 w-4" /></Button>
+                        <Button size="sm" variant="ghost">
+                          <Plus className="h-5 w-5" />
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -220,6 +235,7 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
               </CardContent>
             </Card>
 
+            {/* Items Table */}
             {fields.length > 0 && (
               <Card>
                 <CardHeader>
@@ -230,10 +246,10 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
                     <TableHeader>
                       <TableRow>
                         <TableHead>SKU</TableHead>
-                        <TableHead>Product</TableHead>
+                        <TableHead>Product Name</TableHead>
                         <TableHead>Current Stock</TableHead>
-                        <TableHead className="text-center">Qty</TableHead>
-                        <TableHead></TableHead>
+                        <TableHead className="text-center">Receive Qty</TableHead>
+                        <TableHead className="w-10"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -241,10 +257,10 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
                         const item = displayItems[index]
                         return (
                           <TableRow key={field.id}>
-                            <TableCell className="font-medium">{item?.sku}</TableCell>
+                            <TableCell className="font-mono">{item?.sku}</TableCell>
                             <TableCell>{item?.name}</TableCell>
                             <TableCell>
-                              <Badge variant="secondary">
+                              <Badge variant="outline">
                                 {item?.current_stock || 0} {item?.unit_short}
                               </Badge>
                             </TableCell>
@@ -252,6 +268,7 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
                               <Input
                                 type="number"
                                 min="1"
+                                defaultValue={1}
                                 className="w-24 mx-auto"
                                 {...form.register(`items.${index}.quantity`, { valueAsNumber: true })}
                               />
@@ -278,8 +295,9 @@ export default function InwardCreate({ suppliers, warehouses, nextNumber }) {
               </Card>
             )}
 
-            <div className="flex justify-end">
-              <Button type="submit" size="lg">
+            {/* Submit */}
+            <div className="flex justify-end pt-6">
+              <Button type="submit" size="lg" className="min-w-64">
                 <Save className="mr-2 h-5 w-5" />
                 Save Gate Pass & Receive Stock
               </Button>

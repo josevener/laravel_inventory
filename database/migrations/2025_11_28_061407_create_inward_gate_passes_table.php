@@ -14,12 +14,11 @@ return new class extends Migration
         Schema::create('inward_gate_passes', function (Blueprint $table) {
            $table->id();
             $table->string('gate_pass_no')->unique();           // IGP-2025-00001
-            $table->foreignId('supplier_id')->constrained();
-            $table->foreignId('warehouse_id')->constrained();
+            $table->foreignId('project_id')->constrained();
             $table->string('vehicle_no');
             $table->string('driver_name')->nullable();
             $table->text('remarks')->nullable();
-            $table->enum('status', ['pending', 'received', 'partial'])->default('pending');
+            $table->enum('status', ['pending', 'received', 'partial', 'completed'])->default('pending');
             $table->foreignId('received_by')->nullable()->constrained('users');
             $table->timestamp('received_at')->nullable();
             $table->foreignId('created_by')->constrained('users');

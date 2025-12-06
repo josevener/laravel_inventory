@@ -2,27 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Supplier;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class SupplierController extends Controller
+class ProjectController extends Controller
 {
     public function index()
     {
-        $suppliers = Supplier::withCount('gatePasses')
+        $projects = Project::withCount('gatePasses')
             ->orderBy('company_name')
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('Suppliers/Index', [
-            'suppliers' => $suppliers
+        return Inertia::render('Projects/Index', [
+            'projects' => $projects
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('Suppliers/Create');
+        return Inertia::render('Projects/Create');
     }
 
     public function store(Request $request)
@@ -37,20 +37,20 @@ class SupplierController extends Controller
             'is_active' => 'sometimes|boolean',
         ]);
 
-        Supplier::create($validated);
+        Project::create($validated);
 
-        return redirect()->route('suppliers.index')
-            ->with('success', 'Supplier created successfully.');
+        return redirect()->route('projects.index')
+            ->with('success', 'Project created successfully.');
     }
 
-    public function edit(Supplier $supplier)
+    public function edit(Project $project)
     {
-        return Inertia::render('Suppliers/Edit', [
-            'supplier' => $supplier
+        return Inertia::render('Projects/Edit', [
+            'project' => $project
         ]);
     }
 
-    public function update(Request $request, Supplier $supplier)
+    public function update(Request $request, Project $project)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:100',
@@ -62,20 +62,20 @@ class SupplierController extends Controller
             'is_active' => 'sometimes|boolean',
         ]);
 
-        $supplier->update($validated);
+        $project->update($validated);
 
-        return redirect()->route('suppliers.index')
-            ->with('success', 'Supplier updated.');
+        return redirect()->route('projects.index')
+            ->with('success', 'Project updated.');
     }
 
-    public function destroy(Supplier $supplier)
+    public function destroy(Project $project)
     {
-        if ($supplier->gatePasses()->exists()) {
-            return back()->withErrors(['delete' => 'Cannot delete supplier with existing gate passes.']);
+        if ($project->gatePasses()->exists()) {
+            return back()->withErrors(['delete' => 'Cannot delete project with existing gate passes.']);
         }
 
-        $supplier->delete();
+        $project->delete();
 
-        return back()->with('success', 'Supplier deleted.');
+        return back()->with('success', 'Project deleted.');
     }
 }

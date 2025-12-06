@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\ProductSerial;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,14 +12,22 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'serial_no',
-        'code',
+        'sku',
         'name',
         'category_id',
         'unit_id',
+        'current_stock',
         'reorder_level',
+        'cost_price',
+        'selling_price',
         'description',
     ];
+
+    protected $casts = [
+        'cost_price' => 'decimal:2',
+        'selling_price' => 'decimal:2',
+    ];
+
     protected $guarded = ['id'];
 
     public function category()
@@ -30,10 +39,20 @@ class Product extends Model
     {
         return $this->belongsTo(Unit::class);
     }
-
-    public function warehouses()
+    
+    public function serials()
     {
-        return $this->belongsToMany(Warehouse::class, 'product_warehouse')
-            ->withPivot('current_stock', 'total_value');
+        return $this->hasMany(ProductSerial::class);
+    }
+
+    // Current stock = count of available serials
+    public function getIsLowStockAttribute()
+    {
+        return $this->current_stock > 0 && $this->current_stock < $this->reorder_level;
+    }
+
+    public function getIsOutOfStockAttribute()
+    {
+        return $this->current_stock === 0;
     }
 }

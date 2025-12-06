@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Supplier extends Model
+class Project extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -24,17 +24,6 @@ class Supplier extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
-
-    // Auto generate code like SUP-001, SUP-002...
-    // protected static function boot()
-    // {
-    //     parent::boot();
-
-    //     static::creating(function ($supplier) {
-    //         $latest = self::withTrashed()->max('id') ?? 0;
-    //         $supplier->code = 'SUP-' . str_pad($latest + 1, 3, '0', STR_PAD_LEFT);
-    //     });
-    // }
 
     public function gatePasses()
     {

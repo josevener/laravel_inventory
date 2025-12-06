@@ -10,7 +10,7 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::with('products')->orderBy('name')->get();
 
         return Inertia::render('Categories/Index', [
             'categories' => $categories
@@ -59,9 +59,9 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
-        if ($category->products()->count() > 0) {
-            return back()->withErrors(['delete' => 'Cannot delete category with products assigned.']);
-        }
+        // if ($category->products()->count() > 0) {
+        //     return back()->withErrors(['delete' => 'Cannot delete category with products assigned.']);
+        // }
 
         $category->delete();
 

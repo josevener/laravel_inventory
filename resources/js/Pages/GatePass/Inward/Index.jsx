@@ -1,7 +1,7 @@
 import React from "react"
 import { Head, Link, router } from "@inertiajs/react"
 import { format } from "date-fns"
-import { Truck, Search, Filter, Printer, Plus, SquareArrowOutUpRight } from "lucide-react"
+import { Truck, Search, Filter, Printer, Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,19 +11,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 
-export default function InwardIndex({ gatePasses, filters, suppliers }) {
+export default function InwardIndex({ gatePasses, filters, projects }) {
   const statusColors = {
-    pending: "bg-yellow-100 text-yellow-800",
-    received: "bg-green-100 text-green-800",
-    partial: "bg-orange-100 text-orange-800",
+    pending:   "bg-yellow-100 text-yellow-800",
+    received:  "bg-green-100 text-green-800",
+    partial:   "bg-orange-100 text-orange-800",
+    completed: "bg-blue-100 text-blue-800",
   }
 
-  // Built-in Pagination Component (no import needed)
-  function Pagination({ links }) {
-    if (!links || links.length <= 3) return null;
+  // Simple Pagination Component
+  const Pagination = ({ links }) => {
+    if (!links || links.length <= 3) return null
 
     return (
-      <div className="flex justify-center gap-1 mt-8">
+      <div className="flex justify-center gap-2 mt-8">
         {links.map((link, i) => (
           <Button
             key={i}
@@ -32,7 +33,6 @@ export default function InwardIndex({ gatePasses, filters, suppliers }) {
             disabled={!link.url}
             onClick={() => link.url && router.visit(link.url, { preserveState: true })}
             dangerouslySetInnerHTML={{ __html: link.label }}
-            className="min-w-10"
           />
         ))}
       </div>
@@ -44,6 +44,7 @@ export default function InwardIndex({ gatePasses, filters, suppliers }) {
       <Head title="Inward Gate Passes" />
 
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Truck className="h-10 w-10 text-primary" />
@@ -53,7 +54,7 @@ export default function InwardIndex({ gatePasses, filters, suppliers }) {
             </div>
           </div>
           <Button asChild>
-            <Link href="/gatepass/inward/create">
+            <Link href={route("gatepass.inward.create")}>
               <Plus className="mr-2 h-4 w-4" />
               New Inward Gate Pass
             </Link>
@@ -70,77 +71,96 @@ export default function InwardIndex({ gatePasses, filters, suppliers }) {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by No / Vehicle / Supplier"
+                  placeholder="Search by No, Vehicle, Driver, project..."
                   defaultValue={filters.search || ""}
-                  onKeyUp={(e) => {
+                  onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       const params = new URLSearchParams(window.location.search)
-                      params.set("search", e.target.value)
-                      router.get("/gatepass/inward", params)
+                      params.set("search", e.target.value.trim())
+                      router.get(route("gatepass.inward.index"), params, { preserveState: true })
                     }
                   }}
                   className="pl-10"
                 />
               </div>
 
+              {/* project Filter */}
               <Select
-                value={filters.supplier || ""}
+                value={filters.project || ""}
                 onValueChange={(value) => {
                   const params = new URLSearchParams(window.location.search)
-                  value ? params.set("supplier", value) : params.delete("supplier")
-                  router.get("/gatepass/inward", params)
+                  if (value && value !== "all") {
+                    params.set("project", value)
+                  } else {
+                    params.delete("project")
+                  }
+                  router.get(route("gatepass.inward.index"), params, { preserveState: true })
                 }}
               >
-                <SelectTrigger><SelectValue placeholder="All Suppliers" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Projects" />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Suppliers</SelectItem>
-                  {suppliers.map(s => (
+                  {/* Use value="all" instead of value="" */}
+                  <SelectItem value="all">All Projects</SelectItem>
+                  {projects.map(s => (
                     <SelectItem key={s.id} value={s.id.toString()}>
-                      {s.company_name}
+                      {s.company_name || s.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
+              {/* Status Filter */}
               <Select
                 value={filters.status || ""}
                 onValueChange={(value) => {
                   const params = new URLSearchParams(window.location.search)
-                  value ? params.set("status", value) : params.delete("status")
-                  router.get("/gatepass/inward", params)
+                  if (value && value !== "all") {
+                    params.set("status", value)
+                  } else {
+                    params.delete("status")
+                  }
+                  router.get(route("gatepass.inward.index"), params, { preserveState: true })
                 }}
               >
-                <SelectTrigger><SelectValue placeholder="All Status" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="received">Received</SelectItem>
-                  <SelectItem value="partial">Partial</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
                 </SelectContent>
               </Select>
 
-              <Button variant="outline" onClick={() => router.get("/gatepass/inward")}>
-                Clear
+              {/* Clear */}
+              <Button
+                variant="outline"
+                onClick={() => router.get(route("gatepass.inward.index"))}
+              >
+                Clear Filters
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* List */}
+        {/* List Table */}
         <Card>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead></TableHead>
                   <TableHead>Gate Pass No</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead>Supplier</TableHead>
-                  <TableHead>Warehouse</TableHead>
+                  <TableHead>Projects</TableHead>
                   <TableHead>Vehicle</TableHead>
+                  <TableHead>Driver</TableHead>
                   <TableHead>Items</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -150,23 +170,26 @@ export default function InwardIndex({ gatePasses, filters, suppliers }) {
                 {gatePasses.data.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
-                      No gate passes found.
+                      No inward gate passes found.
                     </TableCell>
                   </TableRow>
                 ) : (
                   gatePasses.data.map((gp) => (
                     <TableRow key={gp.id}>
-                      <TableCell><SquareArrowOutUpRight /></TableCell>
                       <TableCell className="font-mono font-bold text-primary">
                         {gp.gate_pass_no}
                       </TableCell>
-                      <TableCell>{format(new Date(gp.created_at), "dd MMM yyyy")}</TableCell>
-                      <TableCell>{gp.supplier.company_name || gp.supplier.name}</TableCell>
-                      <TableCell>{gp.warehouse.name}</TableCell>
-                      <TableCell>{gp.vehicle_no}</TableCell>
-                      <TableCell><Badge variant="secondary">{gp.items_count}</Badge></TableCell>
+                      <TableCell>{format(new Date(gp.created_at), "dd MMM yyyy, hh:mm a")}</TableCell>
                       <TableCell>
-                        <Badge className={statusColors[gp.status]}>
+                        {gp.project.company_name || gp.project.name}
+                      </TableCell>
+                      <TableCell className="font-mono">{gp.vehicle_no}</TableCell>
+                      <TableCell>{gp.driver_name || "—"}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{gp.items_count}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={statusColors[gp.status] || "bg-gray-100 text-gray-800"}>
                           {gp.status.charAt(0).toUpperCase() + gp.status.slice(1)}
                         </Badge>
                       </TableCell>
@@ -175,18 +198,16 @@ export default function InwardIndex({ gatePasses, filters, suppliers }) {
                           size="sm"
                           variant="ghost"
                           onClick={() => {
-                            // Create invisible link → click it → force download → no Inertia
                             const link = document.createElement('a')
-                            link.href = `/gatepass/inward/${gp.id}/print`
-                            link.download = `IGP-${gp.gate_pass_no}.pdf`  // Forces download
-                            link.target = '_blank'
+                            link.href = route("gatepass.inward.print_gatepass", gp.id)
+                            link.target = "_blank"
+                            link.rel = "noopener noreferrer"
                             document.body.appendChild(link)
                             link.click()
                             document.body.removeChild(link)
                           }}
                         >
                           <Printer className="h-4 w-4" />
-                          Generate
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -197,7 +218,7 @@ export default function InwardIndex({ gatePasses, filters, suppliers }) {
           </CardContent>
         </Card>
 
-        {/* Built-in Pagination */}
+        {/* Pagination */}
         <Pagination links={gatePasses.links} />
       </div>
     </AuthenticatedLayout>

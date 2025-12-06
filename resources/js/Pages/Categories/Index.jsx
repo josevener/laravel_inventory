@@ -58,7 +58,7 @@ export default function CategoriesIndex({ categories }) {
                         <h3 className="font-semibold text-lg">{category.name}</h3>
                         <p className="text-sm text-muted-foreground font-mono">{category.code}</p>
                       </div>
-                      <Badge variant="secondary">{category.products_count || 0} products</Badge>
+                      <Badge variant="secondary">{category.products.length || 0} products</Badge>
                     </div>
                   </CardHeader>
                   <CardContent>

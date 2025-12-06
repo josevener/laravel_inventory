@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SSI Metal Corp - Gate Pass</title>
+    <title>SSI Metal Corp - Gate Pass #{{ $gatePass->gate_pass_no }}</title>
     <style>
         /* PDF PAGE SETTINGS */
         @page {
@@ -208,18 +208,20 @@
     <div class="header-container">
         
         <div class="header-center">
-            <div class="company-name">SSI Metal Corp.</div>
+            <div class="company-name">{{ $company['name'] ?? "SSI Metal Corp."}}</div>
             <div class="location-name">Quezon City</div>
             <div class="doc-title">GATE PASS</div>
         </div>
 
         <div class="header-right">
             <div style="margin-bottom: 5px;">
-                <span class="control-number-large">102424</span>
+                <span class="control-number-large">{{ $gatePass->gate_pass_no }}</span>
             </div>
             <div>
                 <span>Date:</span>
-                <span style="border-bottom: 1px solid black; display: inline-block; min-width: 100px; text-align: center;">Nov 24, 2025</span>
+                <span style="border-bottom: 1px solid black; display: inline-block; min-width: 100px; text-align: center;">
+                    {{ \Carbon\Carbon::parse($gatePass->created_at)->format('F d, Y') }}
+                </span>
             </div>
         </div>
 
@@ -232,7 +234,7 @@
 
         <div class="auth-line">
             This will authorize the bearer: 
-            <span class="input-fill" style="width: 73%;">Edwin Gamban</span>
+            <span class="input-fill" style="width: 73%;">{{ $gatePass->driver_name ?? '—' }}</span>
         </div>
         
         <div class="auth-line">
@@ -251,36 +253,13 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>1 unit</td>
-                <td class="bold italic">*Rotary Hammer Drill sn:00693</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>1 unit</td>
-                <td class="bold italic">*Disc Grinder AEG sn: 60922</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>1 pc</td>
-                <td class="bold italic">*Level Bar "24</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>2 length</td>
-                <td class="bold italic">*Extension Wire 50meters each</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>1 unit</td>
-                <td class="bold italic">*Welding Machine POWER CRAFT sn: 0002</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>1 cyl</td>
-                <td class="bold italic">*Fire Extinguisher</td>
-                <td></td>
-            </tr>
+            @foreach($gatePass->items as $index => $item)
+                <tr>
+                    <td class="font-weight: bold;">*{{ $item->quantity }}</span> {{ $item->product->unit->short_name ?? 'Pc' }}</td>
+                    <td class="font-weight: bold;">*{{ $item->product->name }} {{ $item->product->sku }}</td>
+                    <td></td>
+                </tr>
+            @endforeach
         </tbody>
     </table>
 

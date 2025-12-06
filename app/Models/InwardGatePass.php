@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Supplier;
+use App\Models\Project;
 use App\Models\Warehouse;
 use App\Models\User;
 use App\Models\InwardGatePassItem;
@@ -20,18 +20,16 @@ class InwardGatePass extends Model
         'received_at' => 'datetime',
     ];
 
-    public function supplier()
+    public function project()
     {
-        return $this->belongsTo(Supplier::class);
+        return $this->belongsTo(Project::class);
     }
-    public function warehouse()
-    {
-        return $this->belongsTo(Warehouse::class);
-    }
+   
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
     public function receivedBy()
     {
         return $this->belongsTo(User::class, 'received_by');

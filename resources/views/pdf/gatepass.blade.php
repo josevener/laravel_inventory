@@ -2,160 +2,150 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SSI Metal Corp - Gate Pass</title>
+    <title>SSI Metal Corp - Gate Pass {{ $gatePass->gate_pass_no }}</title>
     <style>
-        /* General Reset and Page Setup */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        /* PDF PAGE SETTINGS */
+        @page {
+            margin: 0px;
+            size: letter;
         }
 
         body {
-            background-color: #f0f0f0;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 12pt;
-            display: flex;
-            justify-content: center;
+            font-size: 11pt;
+            margin: 30px 40px;
         }
 
-        /* The Paper Sheet */
-        .page {
-            background-color: white;
-            width: 216mm; /* A4 Width */
-            min-height: 297mm; /* A4 Height */
-            padding: 30px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            position: relative;
-        }
-
-        /* Helper Classes */
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
+        /* HELPER CLASSES */
         .bold { font-weight: bold; }
-        .underline { border-bottom: 1px solid black; display: inline-block; padding-left: 5px; padding-right: 5px;}
-        .full-width { width: 100%; }
+        .italic { font-style: italic; }
+        .text-center { text-align: center; }
 
-        /* Header Section */
-        .header {
-            position: relative;
-            margin-bottom: 30px;
+        /* HEADER LAYOUT */
+        .header-container {
+            position: relative; 
+            width: 100%; 
+            height: 80px; 
+            /* Added margin-bottom to ensure QR doesn't overlap body */
+            margin-bottom: 20px; 
         }
 
+        /* NEW: QR CODE LEFT ALIGNMENT */
+        .header-left {
+            position: absolute;
+            left: 0;
+            top: 5px; /* Slight offset to align nicely with text */
+        }
+
+        .qr-code-img {
+            width: 70px; /* Adjust size here */
+            height: 70px;
+        }
+
+        .header-center {
+            width: 100%;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1; /* Ensures it sits behind if overlapping, though it shouldn't */
+        }
+
+        .header-right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            text-align: right;
+            width: 200px;
+        }
+        
+        /* COMPACT HEADER STYLES */
         .company-name {
             font-size: 16pt;
             font-weight: bold;
             letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 0px;
+            line-height: 1.2;
         }
 
-        .location {
+        .location-name {
             font-size: 10pt;
-            margin-bottom: 10px;
+            margin-bottom: 2px;
+            line-height: 1;
         }
 
         .doc-title {
             font-size: 20pt;
             font-weight: bold;
-            margin-top: 5px;
             text-transform: uppercase;
+            margin-top: 0px;
+            line-height: 1.2;
         }
 
-        .top-right-info {
-            position: absolute;
-            top: 0;
-            right: 0;
-            text-align: right;
-            width: 250px;
-        }
-
-        .control-number {
-            font-size: 18pt;
+        /* LARGE CONTROL NUMBER STYLE */
+        .control-number-large {
+            font-size: 24pt;
             font-weight: bold;
-            border-bottom: 2px solid black;
-            display: inline-block;
+            color: #000;
+        }
+
+        /* AUTH TEXT WRAPPER */
+        .auth-wrapper {
+            margin-bottom: 10px;
             width: 100%;
-            text-align: center;
-            margin-bottom: 5px;
+            margin-top: 30px; 
         }
 
-        .date-line {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10pt;
-        }
-
-        .date-val {
-            border-bottom: 1px solid black;
-            flex-grow: 1;
-            text-align: center;
-            margin-left: 5px;
-        }
-
-        /* Addressee */
-        .addressee {
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        /* Authorization Text */
-        .auth-block {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            margin-bottom: 5px;
-            line-height: 1.6;
+        .auth-line {
+            margin-bottom: 8px;
+            width: 100%;
+            line-height: 1.5;
         }
         
-        .auth-line {
+        .input-fill {
             border-bottom: 1px solid black;
-            text-align: center;
-            padding: 0 10px;
-            font-style: italic;
+            display: inline-block;
             font-weight: bold;
+            text-align: center;
         }
 
-        /* Table Section */
+        /* MAIN ITEMS TABLE */
         .item-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            margin-top: 15px;
+            margin-bottom: 15px;
         }
 
         .item-table th {
             border-top: 1px solid black;
             border-bottom: 1px solid black;
-            padding: 5px;
+            padding: 8px 5px;
             text-align: left;
             font-weight: bold;
             text-transform: uppercase;
             font-size: 10pt;
+            background-color: #f9f9f9;
         }
 
         .item-table td {
-            padding: 4px 5px;
+            padding: 6px 5px;
             vertical-align: top;
-            font-size: 11pt;
+            font-size: 10pt;
         }
-        
-        /* Specific column alignments */
+
         .item-table th:first-child, .item-table td:first-child {
             text-align: center;
             width: 15%;
         }
 
-        .item-table td:nth-child(2) {
-            font-style: italic;
-            font-weight: bold;
-        }
-
-        /* Separator */
+        /* SEPARATOR */
         .hash-line {
             text-align: center;
             color: #555;
             font-size: 9pt;
-            margin: 10px 0;
+            margin: 20px 0;
             letter-spacing: -1px;
         }
 
@@ -163,209 +153,210 @@
             text-align: right;
             font-size: 9pt;
             font-weight: bold;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
 
-        /* Footer / Signatures */
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* Two main columns */
-            gap: 40px;
-            border-top: 1px solid black; /* Note: To be returned line */
-            padding-top: 5px;
+        /* FOOTER LAYOUT */
+        .footer-wrap {
+            width: 100%;
+            border-top: 1px solid black;
+            padding-top: 15px;
+            position: relative;
         }
 
         .footer-note {
-            grid-column: 1 / -1;
-            font-weight: bold;
-            font-size: 10pt;
-            margin-bottom: 10px;
-            margin-top: -25px; /* Pull up above the border */
-            background: white;
-            width: fit-content;
+            position: absolute;
+            top: -12px;
+            left: 0;
+            background-color: #fff;
             padding-right: 10px;
-        }
-
-        .sig-row {
-            display: flex;
-            margin-bottom: 8px;
-            align-items: flex-start;
+            font-weight: bold;
             font-size: 10pt;
         }
 
-        .sig-label {
-            font-weight: bold;
-            width: 110px; /* Fixed width for labels */
-            flex-shrink: 0;
-        }
+        .col-left { float: left; width: 48%; }
+        .col-right { float: right; width: 48%; }
+        .clearfix::after { content: ""; clear: both; display: table; }
 
-        .sig-line {
-            border-bottom: 1px solid black;
-            flex-grow: 1;
-            height: 18px; /* Height to align with text */
-            position: relative;
+        /* SIGNATURE ROWS */
+        table.sig-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
         }
         
+        table.sig-table td {
+            padding-bottom: 5px;
+            vertical-align: bottom;
+        }
+
+        .label-col { width: 90px; font-weight: bold; font-size: 10pt; }
+        .colon-col { width: 10px; font-weight: bold; }
+        .line-col {
+            border-bottom: 1px solid black;
+            height: 18px;
+            position: relative;
+        }
+
         .sig-value {
             position: absolute;
             bottom: 2px;
             left: 5px;
+            font-weight: normal;
         }
 
-        /* Signature Overlay Simulation */
+        /* Signature Overlay */
         .signature-overlay {
             position: absolute;
-            right: 80px;
-            bottom: 140px;
+            right: 0px;
+            bottom: 150px;
             opacity: 0.7;
             transform: rotate(-10deg);
-            pointer-events: none;
-        }
-
-        /* Print Settings */
-        @media print {
-            body { 
-                background: none; 
-                padding: 0;
-            }
-            .page { 
-                box-shadow: none; 
-                width: 100%;
-                height: auto;
-            }
+            z-index: -1;
         }
     </style>
 </head>
 <body>
 
-    <div class="page">
-        <div class="header">
-            <div class="text-center">
-                <div class="company-name">{{ $company['name'] }}</div>
-                <div class="location">{{ $company['address'] }}</div>
-                <div class="doc-title">GATE PASS</div>
-            </div>
-
-            <div class="top-right-info">
-                <div class="control-number">{{ $gatePass->gate_pass_no }}</div>
-                <div class="date-line">
-                    <span>Date:</span>
-                    <span class="date-val">
-                        {{ \Carbon\Carbon::parse($gatePass->created_at)->format('d M Y h:i A') }}
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <div class="addressee">
-            To : The Guard on Duty
-        </div>
-
-        <div class="auth-block">
-            <span>This wil be authorized the bearer :</span>
-            <span class="auth-line" style="width: 200px;">Edwin Gamban</span>
-        </div>
-        <div class="auth-block">
-            <span>of.</span>
-            <span class="auth-line" style="width: 200px;">{{ $company['name'] }}</span>
-            <span>to pass with the following:</span>
-        </div>
-
-        <table class="item-table">
-            <thead>
-                <tr>
-                    <th>QTY/UNIT</th>
-                    <th>DESCRIPTION</th>
-                    <th>INTENDED FOR</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($gatePass->items as $index => $item)
-                    <tr>
-                        <td class="text-center text-bold" style="font-size:18px;">
-                            {{ $item->quantity }} &nbsp;&nbsp; {{ $item->product->unit->short_name ?? 'Pc' }}
-                        </td>
-                        <td class="text-bold">
-                            {{ $item->product->name }} &nbsp;&nbsp; {{ $item->product->sku }}
-                        </td>
-                        <td>{{ $item->product->name }} &nbsp;&nbsp; {{ $item->product->sku }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        <div class="hash-line">
-            ##########################################nothing follows##########################################
-        </div>
-
-        <div class="project-ref">
-            <div>*For {{ $gatePass->warehouse->name }}</div>
-            <div>{{ $gatePass->supplier->gst_number ?? '—' }}</div>
-        </div>
-
-        <div class="footer-note">Note: To be returned</div>
+    <div class="header-container">
         
-        <div class="footer-grid">
-            <div class="left-col">
-                <div class="sig-row">
-                    <div class="sig-label">Destination</div>
-                    <div class="sig-label" style="width: 10px">:</div>
-                    <div class="sig-line"></div>
-                </div>
-                <div class="sig-row">
-                    <div class="sig-label">Carrier</div>
-                    <div class="sig-label" style="width: 10px">:</div>
-                    <div class="sig-line"><span class="sig-value">bearer</span></div>
-                </div>
-                <div class="sig-row">
-                    <div class="sig-label">Checked by</div>
-                    <div class="sig-label" style="width: 10px">:</div>
-                    <div class="sig-line"></div>
-                </div>
-                <div class="sig-row">
-                    <div class="sig-line text-center" style="border: none; font-size: 9pt;">(GUARD on DUTY)</div>
-                </div>
-                <br>
-                <div class="sig-row">
-                    <div class="sig-label">Received by</div>
-                    <div class="sig-label" style="width: 10px">:</div>
-                    <div class="sig-line"></div>
-                </div>
-                <div class="sig-row">
-                    <div style="font-size: 9pt; font-style: italic;">Signature over Printed Name</div>
-                </div>
-            </div>
-
-            <div class="right-col">
-                <div class="sig-row">
-                    <div class="sig-label">Issued by</div>
-                    <div class="sig-label" style="width: 10px">:</div>
-                    <div class="sig-line"><span class="sig-value">mdp.</span></div>
-                </div>
-                <div class="sig-row">
-                    <div class="sig-label">CHECKED BY</div>
-                    <div class="sig-label" style="width: 10px">:</div>
-                    <div class="sig-line"><span class="sig-value">mdf.</span></div>
-                </div>
-                <div class="sig-row">
-                    <div class="sig-label">NOTED BY</div>
-                    <div class="sig-label" style="width: 10px">:</div>
-                    <div class="sig-line"><span class="sig-value">4-6</span></div>
-                </div>
-                <br>
-                <div class="sig-row">
-                    <div class="sig-label">APPROVED BY</div>
-                    <div class="sig-label" style="width: 10px">:</div>
-                    <div class="sig-line"><span class="sig-value">DCA.</span></div>
-                </div>
-            </div>
+        <div class="header-left">
+            <img src="data:image/svg+xml;base64,{{ $qrCode }}" 
+                class="qr-code-img" 
+                alt="QR Code">
         </div>
 
-        <svg class="signature-overlay" width="100" height="50" viewBox="0 0 100 50">
-            <path d="M10,25 Q30,5 50,25 T90,25" stroke="darkblue" fill="none" stroke-width="2" />
-            <circle cx="50" cy="25" r="15" stroke="darkblue" fill="none" stroke-width="1" />
-        </svg>
+        <div class="header-center">
+            <div class="company-name">{{ $company['name'] ?? "SSI Metal Corp."}}</div>
+            <div class="location-name">Quezon City</div>
+            <div class="doc-title">GATE PASS</div>
+        </div>
+
+        <div class="header-right">
+            <div style="margin-bottom: 5px;">
+                <span class="control-number-large">{{ $gatePass->gate_pass_no }}</span>
+            </div>
+            <div>
+                <span>Date:</span>
+                <span style="border-bottom: 1px solid black; display: inline-block; min-width: 100px; text-align: center;">
+                    {{ \Carbon\Carbon::parse($gatePass->created_at)->format('F d, Y') }}
+                </span>
+            </div>
+        </div>
 
     </div>
+
+    <div class="auth-wrapper">
+        <div class="bold" style="margin-bottom: 15px;">
+            To: The Guard on Duty
+        </div>
+
+        <div class="auth-line">
+            This will authorize the bearer: 
+            <span class="input-fill" style="width: 73%;">{{ $gatePass->driver_name ?? '—' }}</span>
+        </div>
+        
+        <div class="auth-line">
+            of 
+            <span class="input-fill" style="width: 55%;">SSI METAL CORP.</span> 
+            to pass with the following:
+        </div>
+    </div>
+
+    <table class="item-table">
+        <thead>
+            <tr>
+                <th>QTY/UNIT</th>
+                <th>DESCRIPTION</th>
+                <th>INTENDED FOR</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($gatePass->items as $index => $item)
+                <tr>
+                    <td style="font-weight: bold;">*{{ $item->quantity }} {{ $item->product->unit->short_name ?? 'Pc' }}</td>
+                    <td style="font-weight: bold;">*{{ $item->product->name }} {{ $item->product->sku }}</td>
+                    <td></td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <div class="hash-line">
+        ################################################## nothing follows ##################################################
+    </div>
+
+    <div class="project-ref">
+        <div>*For {{ $gatePass->project->name }} Project</div>
+        <div>{{ $gatePass->project->gst_number }}</div>
+    </div>
+
+    <div class="footer-wrap clearfix">
+        <div class="footer-note">Note: To be returned</div>
+
+        <div class="col-left">
+            <table class="sig-table">
+                <tr>
+                    <td class="label-col">Destination</td>
+                    <td class="colon-col">:</td>
+                    <td class="line-col"></td>
+                </tr>
+                <tr>
+                    <td class="label-col">Carrier</td>
+                    <td class="colon-col">:</td>
+                    <td class="line-col"><span class="sig-value">bearer</span></td>
+                </tr>
+                <tr>
+                    <td class="label-col">Checked by</td>
+                    <td class="colon-col">:</td>
+                    <td class="line-col"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="text-center" style="font-size: 8pt; padding-top:2px;">(GUARD on DUTY)</td>
+                </tr>
+                <tr><td colspan="3" style="height: 10px;"></td></tr> 
+                <tr>
+                    <td class="label-col">Received by</td>
+                    <td class="colon-col">:</td>
+                    <td class="line-col"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="font-size: 8pt; font-style: italic;">Signature over Printed Name</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="col-right">
+            <table class="sig-table">
+                <tr>
+                    <td class="label-col">Issued by</td>
+                    <td class="colon-col">:</td>
+                    <td class="line-col"><span class="sig-value">mdp.</span></td>
+                </tr>
+                <tr>
+                    <td class="label-col">CHECKED BY</td>
+                    <td class="colon-col">:</td>
+                    <td class="line-col"><span class="sig-value">mdf.</span></td>
+                </tr>
+                <tr>
+                    <td class="label-col">NOTED BY</td>
+                    <td class="colon-col">:</td>
+                    <td class="line-col"><span class="sig-value">4-6</span></td>
+                </tr>
+                <tr><td colspan="3" style="height: 15px;"></td></tr> 
+                <tr>
+                    <td class="label-col">APPROVED BY</td>
+                    <td class="colon-col">:</td>
+                    <td class="line-col"><span class="sig-value">DCA.</span></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <svg class="signature-overlay" width="100" height="50" viewBox="0 0 100 50">
+        <path d="M10,25 Q30,5 50,25 T90,25" stroke="darkblue" fill="none" stroke-width="2" />
+        <circle cx="50" cy="25" r="15" stroke="darkblue" fill="none" stroke-width="1" />
+    </svg>
+
 </body>
 </html>

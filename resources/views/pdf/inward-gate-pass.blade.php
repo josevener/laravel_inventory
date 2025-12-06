@@ -60,10 +60,10 @@
             <!-- Info Grid -->
             <div class="info-grid">
                 <div class="info-box">
-                    <h3>Supplier Details</h3>
-                    <div class="text-bold text-lg">{{ $gatePass->supplier->company_name ?? $gatePass->supplier->name }}</div>
-                    <div>Phone: {{ $gatePass->supplier->phone ?? '—' }}</div>
-                    <div>GST: {{ $gatePass->supplier->gst_number ?? '—' }}</div>
+                    <h3>Project Details</h3>
+                    <div class="text-bold text-lg">{{ $gatePass->project->company_name ?? $gatePass->project->name }}</div>
+                    <div>Phone: {{ $gatePass->project->phone ?? '—' }}</div>
+                    <div>GST: {{ $gatePass->project->gst_number ?? '—' }}</div>
                 </div>
                 <div class="info-box">
                     <h3>Receiving Warehouse</h3>
