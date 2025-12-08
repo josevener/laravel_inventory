@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('inward_gate_pass_items', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
             $table->foreignId('inward_gate_pass_id')->constrained('inward_gate_passes')->onDelete('cascade');
             $table->foreignId('product_id')->constrained('products');
             $table->integer('quantity');
             $table->timestamps();
 
             // Add indexes for faster queries
+            $table->index('client_id');
             $table->index('inward_gate_pass_id');
             $table->index('product_id');
         });

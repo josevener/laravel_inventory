@@ -6,14 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Trash2, ArrowLeft, Plus } from "lucide-react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import ConfirmDialog from "@/components/custom/ConfirmDialog";
+import { useSafeRoute } from "@/hooks/useSafeRoute";
 
 export default function ProductShow({ product }) {
   const [serialInput, setSerialInput] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
-
+  const safeRoute = useSafeRoute()
+  
   const addSerial = () => {
     router.post(
-      route("product-serials.store"),
+      safeRoute("product-serials.store"),
       {
         product_id: product.id,
         serial_no: serialInput,
@@ -28,7 +30,7 @@ export default function ProductShow({ product }) {
   };
 
   const deleteSerial = (id) => {
-    router.delete(route("product-serials.destroy", id));
+    router.delete(safeRoute("product-serials.destroy", { product: id }));
   };
 
   const openAddModal = () => {
@@ -44,7 +46,7 @@ export default function ProductShow({ product }) {
       <div className="space-y-6">
         {/* Back Button */}
         <Button variant="ghost" asChild>
-          <Link href={route("products.index")}>
+          <Link href={safeRoute("products.index")}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Products
           </Link>
         </Button>

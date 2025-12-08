@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import DeleteConfirmDialog from "@/Components/custom/DeleteConfirmDialog"
+import { useSafeRoute } from "@/hooks/useSafeRoute"
 
 export default function CategoriesIndex({ categories }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deletingCategory, setDeletingCategory] = useState(null)
+  const safeRoute = useSafeRoute()
 
   const openDeleteDialog = (cat) => {
     setDeletingCategory(cat)
@@ -17,7 +19,7 @@ export default function CategoriesIndex({ categories }) {
   }
 
   const handleDelete = () => {
-    router.delete(route("categories.destroy", deletingCategory.id), {
+    router.delete(safeRoute("categories.destroy", { category: deletingCategory.id }), {
       onFinish: () => setDeleteDialogOpen(false),
       preserveScroll: true,
     })
@@ -34,7 +36,7 @@ export default function CategoriesIndex({ categories }) {
             <p className="text-muted-foreground">Organize your products into categories</p>
           </div>
           <Button asChild>
-            <Link href={route("categories.create")}>
+            <Link href={safeRoute("categories.create")}>
               <Plus className="mr-2 h-4 w-4" />
               Add Category
             </Link>
@@ -71,7 +73,7 @@ export default function CategoriesIndex({ categories }) {
                     )}
                     <div className="mt-4 flex gap-2">
                       <Button size="sm" variant="outline" asChild>
-                        <Link href={route("categories.edit", category.id)}>
+                        <Link href={safeRoute("categories.edit", { category: category.id })}>
                           <Edit className="h-4 w-4 mr-1" />
                           Edit
                         </Link>

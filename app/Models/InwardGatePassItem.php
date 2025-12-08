@@ -11,6 +11,7 @@ class InwardGatePassItem extends Model
     use HasFactory;
 
     protected $fillable = [
+        'client_id',
         'inward_gate_pass_id',
         'product_id',
         'quantity',

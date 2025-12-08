@@ -12,6 +12,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
+        'client_id',
         'sku',
         'name',
         'category_id',
@@ -30,6 +31,11 @@ class Product extends Model
 
     protected $guarded = ['id'];
 
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+    
     public function category()
     {
         return $this->belongsTo(Category::class);

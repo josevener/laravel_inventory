@@ -8,6 +8,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { ArrowLeft } from "lucide-react"
 import { Link } from "@inertiajs/react"
 import { Card, CardContent } from "@/components/ui/card"
+import { useSafeRoute } from "@/hooks/useSafeRoute"
 
 export default function Edit({ category }) {
   const { data, setData, put, processing, errors } = useForm({
@@ -15,22 +16,21 @@ export default function Edit({ category }) {
     name: category.name || "",
     description: category.description || "",
   })
+  const safeRoute = useSafeRoute()
 
   const submit = (e) => {
     e.preventDefault()
-    put(route("categories.update", category.id))
+    put(safeRoute("categories.update", { category: category.id }))
   }
 
   return (
-    <AuthenticatedLayout>
+    <AuthenticatedLayout
+      breadCrumbLink={safeRoute("categories.index")}
+      breadCrumbLinkText="Categories"
+      breadCrumbPage="Edit Category"
+    >
       <div className="w-full mx-auto space-y-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={route("categories.index")}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Link>
-          </Button>
           <h1 className="text-3xl font-bold">Edit Category</h1>
         </div>
 
@@ -42,7 +42,7 @@ export default function Edit({ category }) {
                 <Input
                   id="code"
                   value={data.code}
-                  onChange={(e) => setData("code", e.target.value.toUpperCase())}
+                  onChange={(e) => setData("code", e.target.value)}
                   placeholder="CAT-001"
                 />
                 {errors.code && <p className="text-sm text-destructive mt-1">{errors.code}</p>}
@@ -75,7 +75,7 @@ export default function Edit({ category }) {
                   {processing ? "Creating..." : "Edit Category"}
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href={route("categories.index")}>Cancel</Link>
+                  <Link href={safeRoute("categories.index")}>Cancel</Link>
                 </Button>
               </div>
             </form>

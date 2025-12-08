@@ -13,7 +13,20 @@ class ProjectSeeder extends Seeder
      */
     public function run(): void
     {
-        Project::create(['code' => 'Rajesh Traders', 'name' => 'Rajesh Traders', 'company_name' => 'Rajesh & Sons', 'phone' => '9876543210']);
-        Project::create(['code' => 'Shree Cement Ltd', 'name' => 'Shree Cement Ltd', 'company_name' => 'Shree Cement', 'gst_number' => '27AAECS1234H1Z5']);
+        Project::create([
+            'code' => 'Rajesh Traders', 
+            'name' => 'Rajesh Traders', 
+            'company_name' => 'Rajesh & Sons', 
+            'phone' => '9876543210',
+            'client_id' => 1 // Zentrix Solutions
+        ]);
+
+        Project::create([
+            'code' => 'Shree Cement Ltd', 
+            'name' => 'Shree Cement Ltd', 
+            'company_name' => 'Shree Cement', 
+            'project_started' => '27AAECS1234H1Z5',
+            'client_id' => 1 // Zentrix Solutions
+        ]);
     }
 }

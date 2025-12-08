@@ -15,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
+import { useSafeRoute } from "@/hooks/useSafeRoute"
 
 const formSchema = z.object({
   project_id: z.string().min(1, "Select a Project"),
@@ -31,6 +32,7 @@ export default function InwardCreate({ projects, nextNumber }) {
   const [searchResults, setSearchResults] = useState([])
   const [searchLoading, setSearchLoading] = useState(false)
   const [displayItems, setDisplayItems] = useState([])
+  const safeRoute = useSafeRoute()
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -42,6 +44,7 @@ export default function InwardCreate({ projects, nextNumber }) {
     },
   })
 
+  console.log("projects: ", JSON.stringify(projects, null,2))
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "items",
@@ -57,7 +60,7 @@ export default function InwardCreate({ projects, nextNumber }) {
     const timer = setTimeout(async () => {
       setSearchLoading(true)
       try {
-        const res = await axios.get("/products/search", {
+        const res = await axios.get(safeRoute("products.search"), {
           params: { q: searchTerm }
         })
         setSearchResults(res.data)
@@ -87,7 +90,7 @@ export default function InwardCreate({ projects, nextNumber }) {
   }
 
   const onSubmit = (data) => {
-    router.post("/gatepass/inward", {
+    router.post(safeRoute("gatepass.inward.store"), {
       ...data,
       nextNumber,
     }, {
@@ -101,11 +104,11 @@ export default function InwardCreate({ projects, nextNumber }) {
 
   return (
     <AuthenticatedLayout
-      breadCrumbLink="/gatepass/inward"
+      breadCrumbLink={safeRoute("gatepass.inward.index")}
       breadCrumbLinkText="Inward Gate Passes"
       breadCrumbPage="New Inward Gate Pass"
     >
-      <div className="w-full mx-auto space-y-8 py-6">
+      <div className="w-full mx-auto">
         {/* Header */}
         <div className="flex items-center gap-6">
           <Truck className="h-14 w-14 text-primary" />
@@ -118,7 +121,7 @@ export default function InwardCreate({ projects, nextNumber }) {
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 
             {/* Project & Vehicle Info */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

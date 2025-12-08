@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductSerial extends Model
 {
-    protected $fillable = ['product_id', 'serial_no', 'is_available'];
+    protected $fillable = [
+        'client_id',
+        'product_id', 
+        'serial_no', 
+        'is_available'
+    ];
 
     protected $casts = [
         'is_available' => 'boolean',

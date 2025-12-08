@@ -8,33 +8,34 @@ import { Card, CardContent } from "@/components/ui/card"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { ArrowLeft, Building2 } from "lucide-react"
 import { Link } from "@inertiajs/react"
+import { useSafeRoute } from "@/hooks/useSafeRoute"
 
 export default function Edit({ project }) {
   const { data, setData, put, processing, errors } = useForm({
+    code: project.code || "",
     name: project.name || "",
     company_name: project.company_name || "",
     phone: project.phone || "",
     email: project.email || "",
     address: project.address || "",
-    gst_number: project.gst_number || "",
+    project_started: project.project_started || "",
     is_active: project.is_active || true,
   })
-  
+  const safeRoute = useSafeRoute()
+
   const submit = (e) => {
     e.preventDefault()
-    put(route("projects.update", project.id))
+    put(safeRoute("projects.update", { project: project.id }))
   }
 
   return (
-    <AuthenticatedLayout>
+    <AuthenticatedLayout
+      breadCrumbLink={safeRoute("projects.index")}
+      breadCrumbLinkText="Projects"
+      breadCrumbPage="Edit Project"
+    >
       <div className="w-full mx-auto">
         <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={route("projects.index")}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Link>
-          </Button>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Building2 className="h-8 w-8" />
             Update Project
@@ -45,6 +46,17 @@ export default function Edit({ project }) {
           <CardContent className="pt-6">
             <form onSubmit={submit} className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Code *</Label>
+                  <Input
+                    id="code"
+                    value={data.code}
+                    onChange={(e) => setData("code", e.target.value)}
+                    placeholder="e.g., ABC123"
+                  />
+                  {errors.code && <p className="text-sm text-destructive mt-1">{errors.code}</p>}
+                </div>
+
                 <div>
                   <Label htmlFor="name">Contact Person *</Label>
                   <Input
@@ -91,11 +103,11 @@ export default function Edit({ project }) {
 
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="gst_number">GST Number</Label>
+                  <Label htmlFor="project_started">Project Started</Label>
                   <Input
-                    id="gst_number"
-                    value={data.gst_number}
-                    onChange={(e) => setData("gst_number", e.target.value.toUpperCase())}
+                    id="project_started"
+                    value={data.project_started}
+                    onChange={(e) => setData("project_started", e.target.value)}
                     placeholder="22AAAAA0000A1Z5"
                   />
                 </div>
@@ -126,7 +138,7 @@ export default function Edit({ project }) {
                   {processing ? "Creating..." : "Edit project"}
                 </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <Link href={route("projects.index")}>Cancel</Link>
+                  <Link href={safeRoute("projects.index")}>Cancel</Link>
                 </Button>
               </div>
             </form>

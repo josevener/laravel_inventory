@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import DeleteConfirmDialog from "@/Components/custom/DeleteConfirmDialog"
+import { useSafeRoute } from "@/hooks/useSafeRoute"
 
 export default function Index({ projects }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deletingProject, setDeletingProject] = useState(null)
+  const safeRoute = useSafeRoute()
 
   const openDelete = (project) => {
     setDeletingProject(project)
@@ -17,7 +19,7 @@ export default function Index({ projects }) {
   }
 
   const handleDelete = () => {
-    router.delete(route("projects.destroy", deletingProject.id), {
+    router.delete(safeRoute("projects.destroy", { project: deletingProject.id }), {
       onFinish: () => setDeleteDialogOpen(false),
       preserveScroll: true,
     })
@@ -25,7 +27,7 @@ export default function Index({ projects }) {
 
   return (
     <AuthenticatedLayout>
-      <Head title="projects" />
+      <Head title="Projects" />
 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -34,7 +36,7 @@ export default function Index({ projects }) {
             <p className="text-muted-foreground">Manage your projects and vendors</p>
           </div>
           <Button asChild>
-            <Link href={route("projects.create")}>
+            <Link href={safeRoute("projects.create")}>
               <Plus className="mr-2 h-4 w-4" />
               Add Project
             </Link>
@@ -87,10 +89,10 @@ export default function Index({ projects }) {
                     <span className="line-clamp-2">{project.address}</span>
                   </div>
                 )}
-                {project.gst_number && (
+                {project.project_started && (
                   <div className="flex items-center gap-2 text-xs">
                     <BadgeCheck className="h-3.5 w-3.5 text-green-600" />
-                    GST: {project.gst_number}
+                    PRJ: {project.project_started}
                   </div>
                 )}
 
@@ -100,7 +102,7 @@ export default function Index({ projects }) {
                   </span>
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" asChild>
-                      <Link href={route("projects.edit", project.id)}>
+                      <Link href={safeRoute("projects.edit", { project: project.id })}>
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>

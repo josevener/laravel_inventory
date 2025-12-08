@@ -288,7 +288,7 @@
 
     <div class="project-ref">
         <div>*For {{ $gatePass->project->name }} Project</div>
-        <div>{{ $gatePass->project->gst_number }}</div>
+        <div>{{ $gatePass->project->project_started ?? "C-" . $gatePass->project->created_at->format('Y-m-d')}}</div>
     </div>
 
     <div class="footer-wrap clearfix">

@@ -14,10 +14,24 @@ class InwardGatePass extends Model
     /** @use HasFactory<\Database\Factories\InwardGatePassFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'client_id',
+        'gate_pass_no',
+        'project_id',
+        'vehicle_no',
+        'driver_name',
+        'remarks',
+        'status',
+        'received_by',
+        'received_at',
+        'created_by',
+    ];
+        
     protected $guarded = ['id'];
 
     protected $casts = [
         'received_at' => 'datetime',
+        'status' => 'string',
     ];
 
     public function project()
@@ -38,5 +52,10 @@ class InwardGatePass extends Model
     public function items()
     {
         return $this->hasMany(InwardGatePassItem::class);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
     }
 }

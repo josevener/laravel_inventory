@@ -16,12 +16,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import DeleteConfirmDialog from "@/components/custom/DeleteConfirmDialog"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
+import { useSafeRoute } from "@/hooks/useSafeRoute"
 
 export default function ProductsIndex({ products: initialProducts }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deletingProduct, setDeletingProduct] = useState(null)
   const [searchInput, setSearchInput] = useState("")
   const [searchQuery, setSearchQuery] = useState("") // This triggers filtering
+
+  const safeRoute = useSafeRoute()
+
 
   // Filter only when searchQuery changes
   const filteredProducts = initialProducts.filter(p =>
@@ -52,10 +56,18 @@ export default function ProductsIndex({ products: initialProducts }) {
   }
 
   const handleDelete = () => {
-    router.delete(route("products.destroy", deletingProduct.id), {
-      onFinish: () => setDeleteDialogOpen(false),
-      preserveScroll: true,
-    })
+    router.delete(
+      safeRoute("products.destroy", { product: deletingProduct.id }),
+      {
+        onSuccess: () => {
+          toast({ title: "Success", description: "Product deleted!" })
+        },
+        onError: () => {
+          toast({ variant: "destructive", title: "Error", description: "Cannot delete product." })
+        },
+        onFinish: () => setDeleteDialogOpen(false),
+      }
+    )
   }
 
   return (
@@ -98,7 +110,7 @@ export default function ProductsIndex({ products: initialProducts }) {
             </div>
 
             <Button asChild>
-              <Link href={route("products.create")}>
+              <Link href={safeRoute("products.create")}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Product
               </Link>
@@ -138,7 +150,7 @@ export default function ProductsIndex({ products: initialProducts }) {
                     <TableHead>SKU / Name</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Unit</TableHead>
-                    <TableHead className="text-right">Current Stock</TableHead>
+                    <TableHead className="text-right">Stock</TableHead>
                     <TableHead className="text-center">Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -159,7 +171,7 @@ export default function ProductsIndex({ products: initialProducts }) {
                         <TableRow key={product.id}>
                           <TableCell>
                             <Button 
-                              onClick={() => router.visit(route("products.show", product.id))}
+                              onClick={() => router.visit(safeRoute("products.show", { product: product.id }))}
                               className="cursor-pointer bg-transparent hover:bg-gray-50"
                             >
                               <SquareArrowOutUpRight className="h-5 w-5 text-green-500" />
@@ -171,8 +183,8 @@ export default function ProductsIndex({ products: initialProducts }) {
                               <div className="text-sm text-foreground">{product.name}</div>
                             </div>
                           </TableCell>
-                          <TableCell>{product.category.name}</TableCell>
-                          <TableCell>{product.unit.short_name}</TableCell>
+                          <TableCell>{product.category?.name}</TableCell>
+                          <TableCell>{product.unit?.short_name}</TableCell>
                           <TableCell className="text-right font-semibold">
                             <span className={isOut ? "text-destructive" : isLow ? "text-orange-600" : "text-green-600"}>
                               {product.current_stock}
@@ -193,7 +205,7 @@ export default function ProductsIndex({ products: initialProducts }) {
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Button variant="outline" size="sm" asChild>
-                                <Link href={route("products.edit", product.id)}>
+                                <Link href={safeRoute("products.edit", { product: product.id })}>
                                   <Edit className="h-4 w-4" />
                                 </Link>
                               </Button>

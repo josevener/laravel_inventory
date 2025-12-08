@@ -13,17 +13,20 @@ return new class extends Migration
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->unique();                    // e.g. SUP-001
+            $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
+            $table->string('code');
+            $table->unique(['client_id', 'code']);
             $table->string('name');                              // Contact person
             $table->string('company_name')->nullable();
-            $table->string('phone', 20)->nullable();
+            $table->string('phone', 50)->nullable();
             $table->string('email')->nullable();
             $table->text('address')->nullable();
-            $table->string('gst_number', 20)->nullable();
+            $table->string('project_started')->nullable();
             $table->boolean('is_active')->default(true);
             $table->softDeletes();
             $table->timestamps();
 
+            $table->index('client_id');
             $table->index('name');
             $table->index('company_name');
             $table->index('is_active');

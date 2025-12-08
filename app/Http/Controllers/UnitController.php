@@ -1,0 +1,88 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Unit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+
+class UnitController extends Controller
+{
+    public function index()
+    {
+        $units = Unit::with('products')
+            ->where('client_id', Auth::user()->client_id)
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('Units/Index', [
+            'units' => $units
+        ]);
+    }
+
+    public function create()
+    {
+        return Inertia::render('Units/Create');
+    }
+
+    public function store($client, Request $request)
+    {
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('units', 'name')
+                    ->where('client_id', Auth::user()->client_id),
+            ],
+            'short_name' => [
+                'required',
+                'string',
+                'max:10',
+                Rule::unique('units', 'short_name')
+                    ->where('client_id', Auth::user()->client_id),
+            ],
+        ]);
+
+        $validated['client_id'] = Auth::user()->client_id;
+        
+        Unit::create($validated);
+
+        return redirect()->route('units.index', ['client' => $client])
+            ->with('success', 'Unit created successfully.');
+    }
+
+    public function edit($client, Unit $unit)
+    {
+        return Inertia::render('Units/Edit', [
+            'unit' => $unit
+        ]);
+    }
+
+    public function update(Request $request, $client, Unit $unit)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:50|unique:units,name,' . $unit->id,
+            'short_name' => 'required|string|max:10|unique:units,short_name,' . $unit->id,
+        ]);
+
+        $unit->update($validated);
+
+        return redirect()->route('units.index', ['client' => $client])
+            ->with('success', 'Unit updated.');
+    }
+
+    public function destroy($client, Unit $unit)
+    {
+        if ($unit->products()->exists()) {
+            return back()->withErrors(['delete' => 'Cannot delete unit used by products.']);
+        }
+
+        $unit->delete();
+
+        return redirect()->route('units.index', ['client' => $client])
+            ->with('success', 'Unit deleted.');
+    }
+}

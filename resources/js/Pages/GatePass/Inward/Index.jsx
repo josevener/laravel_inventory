@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
+import { useSafeRoute } from "@/hooks/useSafeRoute"
 
 export default function InwardIndex({ gatePasses, filters, projects }) {
   const statusColors = {
@@ -18,6 +19,7 @@ export default function InwardIndex({ gatePasses, filters, projects }) {
     partial:   "bg-orange-100 text-orange-800",
     completed: "bg-blue-100 text-blue-800",
   }
+  const safeRoute = useSafeRoute()
 
   // Simple Pagination Component
   const Pagination = ({ links }) => {
@@ -54,7 +56,7 @@ export default function InwardIndex({ gatePasses, filters, projects }) {
             </div>
           </div>
           <Button asChild>
-            <Link href={route("gatepass.inward.create")}>
+            <Link href={safeRoute("gatepass.inward.create")}>
               <Plus className="mr-2 h-4 w-4" />
               New Inward Gate Pass
             </Link>
@@ -81,7 +83,7 @@ export default function InwardIndex({ gatePasses, filters, projects }) {
                     if (e.key === "Enter") {
                       const params = new URLSearchParams(window.location.search)
                       params.set("search", e.target.value.trim())
-                      router.get(route("gatepass.inward.index"), params, { preserveState: true })
+                      router.get(safeRoute("gatepass.inward.index"), params, { preserveState: true })
                     }
                   }}
                   className="pl-10"
@@ -98,7 +100,7 @@ export default function InwardIndex({ gatePasses, filters, projects }) {
                   } else {
                     params.delete("project")
                   }
-                  router.get(route("gatepass.inward.index"), params, { preserveState: true })
+                  router.get(safeRoute("gatepass.inward.index"), params, { preserveState: true })
                 }}
               >
                 <SelectTrigger>
@@ -125,7 +127,7 @@ export default function InwardIndex({ gatePasses, filters, projects }) {
                   } else {
                     params.delete("status")
                   }
-                  router.get(route("gatepass.inward.index"), params, { preserveState: true })
+                  router.get(safeRoute("gatepass.inward.index"), params, { preserveState: true })
                 }}
               >
                 <SelectTrigger>
@@ -142,7 +144,7 @@ export default function InwardIndex({ gatePasses, filters, projects }) {
               {/* Clear */}
               <Button
                 variant="outline"
-                onClick={() => router.get(route("gatepass.inward.index"))}
+                onClick={() => router.get(safeRoute("gatepass.inward.index"))}
               >
                 Clear Filters
               </Button>
@@ -158,7 +160,7 @@ export default function InwardIndex({ gatePasses, filters, projects }) {
                 <TableRow>
                   <TableHead>Gate Pass No</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead>Projects</TableHead>
+                  <TableHead>Project</TableHead>
                   <TableHead>Vehicle</TableHead>
                   <TableHead>Driver</TableHead>
                   <TableHead>Items</TableHead>
@@ -199,7 +201,7 @@ export default function InwardIndex({ gatePasses, filters, projects }) {
                           variant="ghost"
                           onClick={() => {
                             const link = document.createElement('a')
-                            link.href = route("gatepass.inward.print_gatepass", gp.id)
+                            link.href = safeRoute("gatepass.inward.print_gatepass", { gatepass: gp.id })
                             link.target = "_blank"
                             link.rel = "noopener noreferrer"
                             document.body.appendChild(link)

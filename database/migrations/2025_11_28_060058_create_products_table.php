@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('sku')->unique();
+            $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
+            $table->string('sku');
+            $table->unique(['client_id', 'sku']);
             $table->string('name');
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->foreignId('unit_id')->constrained('units')->onDelete('cascade');
@@ -26,6 +28,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Indexes
+            $table->index('client_id');
             $table->index('name');
             $table->index('category_id');
             $table->index('current_stock');

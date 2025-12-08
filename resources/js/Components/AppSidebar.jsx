@@ -5,17 +5,16 @@ import {
   LayoutDashboard,
   Package,
   Truck,
-  ArrowLeftRight,
-  AlertCircle,
   FileText,
-  Settings,
   UserCheck,
   Factory,
+  Users,
+  Shield,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
-import {
+import { 
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -23,11 +22,11 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-const CompanyHeader = () => (
+const CompanyHeader = ({ company_name }) => (
   <div className="flex items-center gap-3 px-4 py-6">
     <Factory className="h-9 w-9 text-primary" />
     <div>
-      <h1 className="text-xl font-bold tracking-tight">SSI Metal Corp.</h1>
+      <h1 className="text-xl font-bold tracking-tight">{company_name}</h1>
       {/* <p className="text-xs text-muted-foreground">Management System</p> */}
     </div>
   </div>
@@ -39,24 +38,45 @@ export function AppSidebar({ ...props }) {
 
   const hasPermission = (perm) => !perm || userPermissions.includes(perm)
 
+  const clientCode = auth?.user?.client?.code;
+
   const navMain = [
-    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, permission: "view dashboard" },
-    { title: "Products", url: "/products", icon: Package, permission: "manage products" },
-    { title: "Inward Gate Pass", url: "/gatepass/inward", icon: Truck, badge: "IN", permission: "view inward gatepass" },
-    { title: "Pull Out", url: "/pull_out", icon: Truck, permission: "create outward gatepass" },
-    { title: "Stock Transfer", url: "/transfer", icon: ArrowLeftRight, permission: "manage stock transfer" },
-    { title: "Stock Adjustment", url: "/adjustment", icon: AlertCircle, permission: "adjust stock" },
+    { title: "Dashboard", url: "dashboard", icon: LayoutDashboard, permission: "View Dashboard" },
+    { title: "Products", url: "products", icon: Package, permission: "View Products" },
+    { title: "Inward Gate Pass", url: "gatepass/inward", icon: Truck, badge: "IN", permission: "View Inward Gatepass" },
+    { title: "Pull Out", url: "pull_out", icon: Truck, permission: "View Outward Gatepass" },
+    // { title: "Stock Transfer", url: "/transfer", icon: ArrowLeftRight, permission: "manage stock transfer" },
+    // { title: "Stock Adjustment", url: "/adjustment", icon: AlertCircle, permission: "adjust stock" },
     {
       group: "Masters",
       items: [
-        { title: "Categories", url: "/categories", permission: "manage products" },
-        { title: "Projects", url: "/projects", permission: "manage products" },
-        { title: "Units", url: "/units", permission: "manage products" },
+        { title: "Categories", url: "categories", permission: "View Categories" },
+        { title: "Projects", url: "projects", permission: "View Projects" },
+        { title: "Units", url: "units", permission: "View Units" },
       ],
     },
-    { title: "Reports", url: "/reports", icon: FileText, permission: "view reports" },
-    { title: "Users & Roles", url: "/users", icon: UserCheck, permission: "manage users" },
-  ].filter(item => {
+    { title: "Users", url: "users", icon: UserCheck, permission: "View Users" },
+    { title: "Companies", url: "companies", icon: Users, permission: "View Companies" },
+    { title: "Roles & Permissions", url: "roles-permissions", icon: Shield, permission: "View Reports" },
+    // { title: "Roles", url: "roles-permissions/roles", icon: FileText, permission: "view reports" },
+    // { title: "Permissions", url: "roles-permissions/permissions", icon: Shield, permission: "view reports" },
+    { title: "Reports", url: "reports", icon: FileText, permission: "View Reports" },
+  ].map((item) => {
+    if (item.items) {
+      return {
+        ...item,
+        items: item.items.map((sub) => ({
+          ...sub,
+          url: `/${clientCode}/${sub.url}`,
+        })),
+      };
+    }
+
+    return {
+      ...item,
+      url: `/${clientCode}/${item.url}`,
+    };
+  }).filter(item => {
     if (item.permission) return hasPermission(item.permission)
     if (item.items) return item.items.some(sub => hasPermission(sub.permission))
     return true
@@ -65,7 +85,7 @@ export function AppSidebar({ ...props }) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <CompanyHeader />
+        <CompanyHeader company_name={auth?.user?.client?.name}/>
       </SidebarHeader>
 
       <SidebarContent>

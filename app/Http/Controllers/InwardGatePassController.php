@@ -20,9 +20,16 @@ class InwardGatePassController extends Controller
 {
     public function index(Request $request)
     {
+        $authClient = Auth::user()->client;
+
         $query = InwardGatePass::with(['project', 'createdBy'])
             ->withCount('items')
             ->latest();
+
+        // If client is NOT superadmin → restrict by client_id
+        if (!$authClient->is_superadmin) {
+            $query->where('client_id', $authClient->id);
+        }
 
         // Filters
         if ($request->filled('status')) {
@@ -39,7 +46,10 @@ class InwardGatePassController extends Controller
                 $q->where('gate_pass_no', 'LIKE', "%{$search}%")
                     ->orWhere('vehicle_no', 'LIKE', "%{$search}%")
                     ->orWhere('driver_name', 'LIKE', "%{$search}%")
-                    ->orWhereHas('project', fn($q) => $q->where('company_name', 'LIKE', "%{$search}%")->orWhere('name', 'LIKE', "%{$search}%"));
+                    ->orWhereHas('project', function ($q) use ($search) {
+                        $q->where('company_name', 'LIKE', "%{$search}%")
+                            ->orWhere('name', 'LIKE', "%{$search}%");
+                    });
             });
         }
 
@@ -47,56 +57,73 @@ class InwardGatePassController extends Controller
 
         return Inertia::render('GatePass/Inward/Index', [
             'gatePasses' => $gatePasses,
-            'filters'    => $request->only(['status', 'project', 'search']),
-            'projects'  => Project::orderBy('company_name')->get(['id', 'company_name', 'name']),
+            'filters' => $request->only(['status', 'project', 'search']),
+            'projects' => Project::when(
+                !$authClient->is_superadmin,
+                fn($q) =>
+                $q->where('client_id', $authClient->id)
+            )
+                ->orderBy('company_name')
+                ->get(['id', 'company_name', 'name']),
         ]);
     }
 
     public function create()
     {
+        $authClient = Auth::user()->client;
+
         $today = now()->startOfDay();
 
-        // Count how many gate passes were created today
-        $todayCount = InwardGatePass::whereDate('created_at', $today)->count();
+        // Tenant-safe numbering
+        $todayCount = InwardGatePass::where('client_id', $authClient->id)
+            ->whereDate('created_at', $today)
+            ->count();
 
-        // Start from 3000 every day
         $nextNumber = 3000 + $todayCount;
-        
+
         return Inertia::render('GatePass/Inward/Create', [
-            'projects' => Project::all(['id', 'name', 'company_name']),
+            'projects' => Project::when(
+                !$authClient->is_superadmin,
+                fn($q) =>
+                $q->where('client_id', $authClient->id)
+            )
+                ->orderBy('company_name')
+                ->get(['id', 'name', 'company_name']),
             'nextNumber' => $nextNumber,
         ]);
     }
 
-    public function store(Request $request)
+    public function store($client, Request $request)
     {
         $validated = $request->validate([
-            'project_id'   => 'required|exists:projects,id',
-            'vehicle_no'    => 'required|string|max:20',
-            'driver_name'   => 'nullable|string|max:100',
-            'items'         => 'required|array|min:1',
+            'project_id' => 'required|exists:projects,id',
+            'vehicle_no' => 'required|string|max:20',
+            'driver_name' => 'nullable|string|max:100',
+            'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity'   => 'required|integer|min:1',
+            'items.*.quantity' => 'required|integer|min:1',
         ]);
 
         DB::transaction(function () use ($validated, $request) {
             // 1. Create the Inward Gate Pass
             $gatePass = InwardGatePass::create([
                 'gate_pass_no' => $request->nextNumber,
-                'project_id'  => $validated['project_id'],
-                'vehicle_no'   => $validated['vehicle_no'],
-                'driver_name'  => $validated['driver_name'],
-                'created_by'   => Auth::id(),
-                'status'       => 'completed', // Auto-complete since no warehouse approval needed
-                'received_at'  => now(),
+                'project_id' => $validated['project_id'],
+                'vehicle_no' => $validated['vehicle_no'],
+                'driver_name' => $validated['driver_name'],
+                'created_by' => Auth::id(),
+                'status' => 'completed', // Auto-complete since no warehouse approval needed
+                'received_at' => now(),
+                'client_id' => Auth::user()->client_id,
             ]);
 
             // 2. Create items
             foreach ($validated['items'] as $item) {
                 InwardGatePassItem::create([
                     'inward_gate_pass_id' => $gatePass->id,
-                    'product_id'          => $item['product_id'],
-                    'quantity'            => $item['quantity'],
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'client_id' => Auth::user()->client_id,
                 ]);
 
                 // 3. Update product stock immediately
@@ -106,7 +133,9 @@ class InwardGatePassController extends Controller
         });
 
         return redirect()
-            ->route('gatepass.inward.index')
+            ->route('gatepass.inward.index', [
+                'client' => $client,
+            ])
             ->with('success', "Inward Gate Pass {$request->nextNumber} created and stock received successfully!");
     }
 
@@ -175,8 +204,7 @@ class InwardGatePassController extends Controller
     //         ->download(now() . 'Payslip-FullMonth.pdf');
     // }
 
-    
-    public function print_gatepass(InwardGatePass $gatepass)
+    public function print_gatepass($client, InwardGatePass $gatepass)
     {
         // Load all needed relationships
         $gatepass->load([
@@ -187,8 +215,8 @@ class InwardGatePassController extends Controller
 
         // Company info from config (recommended way)
         $company = [
-            'name'    => config('app.name', 'SSI Metal Corp.'),
-            'address' =>  'Quezon City',
+            'name' => config('app.name', 'SSI Metal Corp.'),
+            'address' => 'Quezon City',
         ];
 
         // Generate QR Code (SVG → Base64)
@@ -196,7 +224,10 @@ class InwardGatePassController extends Controller
             QrCode::format('svg')
                 ->size(140)
                 ->errorCorrection('H')
-                ->generate(route('gatepass.inward.print_gatepass', $gatepass->id))
+                ->generate(route('gatepass.inward.print_gatepass', [
+                    'gatepass' => $gatepass->id,
+                    'client' => $client
+                ]))
         );
 
         // Optional: Generate Barcode (using DNS1D or similar)
@@ -205,8 +236,8 @@ class InwardGatePassController extends Controller
         // Load PDF View
         $pdf = Pdf::loadView('pdf.gatepass', [
             'gatePass' => $gatepass,
-            'company'  => $company,
-            'qrCode'   => $qrCode,
+            'company' => $company,
+            'qrCode' => $qrCode,
             // 'barcode'  => $barcode ?? null,
         ])
             ->setPaper('letter', 'portrait')

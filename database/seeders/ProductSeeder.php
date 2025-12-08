@@ -28,7 +28,11 @@ class ProductSeeder extends Seeder
 
         foreach ($categoryNames as $name) {
             Category::firstOrCreate(
-                ['name' => $name, 'code' => $name],
+                [
+                    'client_id' => 1, // Zentrix Solutions 
+                    'name' => $name, 
+                    'code' => $name
+                ],
             );
         }
 
@@ -44,8 +48,11 @@ class ProductSeeder extends Seeder
 
         foreach ($units as $short => $full) {
             Unit::firstOrCreate(
-                ['short_name' => $short],
-                ['name' => $full]
+                [
+                    'client_id' => 1, // Zentrix Solutions
+                    'short_name' => $short,
+                    'name' => $full
+                ],
             );
         }
 
@@ -94,6 +101,7 @@ class ProductSeeder extends Seeder
                 'reorder_level'  => $p['reorder'],
                 'cost_price'     => $p['cost'],
                 'selling_price'  => $p['sell'],
+                'client_id' => 1, // Zentrix Solutions
             ]);
         }
     }

@@ -14,7 +14,18 @@ class WarehouseSeeder extends Seeder
     public function run(): void
     {
         // In any seeder or tinker
-        Warehouse::firstOrCreate(['name' => 'Main Warehouse', 'code' => 'WH-0001', 'address' => '123 Factory St']);
-        Warehouse::firstOrCreate(['name' => 'Branch Warehouse', 'code' => 'WH-0002', 'address' => '456 Market Rd']);
+        Warehouse::firstOrCreate([
+            'name' => 'Main Warehouse', 
+            'code' => 'WH-0001', 
+            'address' => '123 Factory St',
+            'client_id' => 1, // Zentrix Solutions
+        ]);
+        
+        Warehouse::firstOrCreate([
+            'name' => 'Branch Warehouse', 
+            'code' => 'WH-0002', 
+            'address' => '456 Market Rd',
+            'client_id' => 1, // Zentrix Solutions
+        ]);
     }
 }

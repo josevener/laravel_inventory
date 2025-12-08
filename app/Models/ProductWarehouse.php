@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductWarehouse extends Model
 {
+    protected $fillable = [
+        'client_id',
+    ];
     protected $table = 'product_warehouse';
     protected $guarded = ['id'];
 

@@ -12,6 +12,7 @@ class Category extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'client_id',
         'code',
         'name',
         'description',
@@ -36,5 +37,10 @@ class Category extends Model
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
     }
 }

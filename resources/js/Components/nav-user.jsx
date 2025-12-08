@@ -30,11 +30,18 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+import { router } from "@inertiajs/react"
+
 export function NavUser({
   user
 }) {
   const { isMobile } = useSidebar()
 
+  const handleLogout = () => {
+    router.post(route("logout"), {
+      preserveScroll: true,
+    })
+  }
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -94,9 +101,14 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
+            <DropdownMenuItem asChild>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 w-full"
+              >
+                <LogOut />
+                Log out
+              </button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

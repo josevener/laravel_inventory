@@ -13,9 +13,14 @@ return new class extends Migration
     {
         Schema::create('units', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
             $table->string('name')->index(); // Piece, Kilogram, Liter
             $table->string('short_name'); // Pc, Kg, Ltr
+            $table->softDeletes();
             $table->timestamps();
+
+            $table->index('client_id');
+            $table->index('short_name');
         });
     }
 

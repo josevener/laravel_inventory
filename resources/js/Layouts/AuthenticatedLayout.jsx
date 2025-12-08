@@ -2,6 +2,7 @@ import { AppSidebar } from "@/Components/AppSidebar";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/Components/ui/breadcrumb";
 import { Separator } from "@/Components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/Components/ui/sidebar";
+import { Toaster } from "@/Components/ui/toaster";
 
 export default function AuthenticatedLayout({ 
     breadCrumbLink,
@@ -46,6 +47,7 @@ export default function AuthenticatedLayout({
                     </div>
                 </header>
                 <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+                    <Toaster />
                     {children}
                 </div>
             </SidebarInset>

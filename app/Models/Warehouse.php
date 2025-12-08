@@ -11,6 +11,10 @@ class Warehouse extends Model
     /** @use HasFactory<\Database\Factories\WarehouseFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'client_id',
+    ];
+    
     protected $guarded = ['id'];
 
     public function stocks()

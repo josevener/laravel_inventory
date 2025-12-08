@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::with('products')->orderBy('name')->get();
+        $categories = Category::with('products')
+            ->where('client_id', Auth::user()->client_id)
+            ->orderBy('name')
+            ->get();
 
         return Inertia::render('Categories/Index', [
             'categories' => $categories
@@ -22,7 +26,7 @@ class CategoryController extends Controller
         return Inertia::render('Categories/Create');
     }
 
-    public function store(Request $request)
+    public function store($client, Request $request)
     {
         $validated = $request->validate([
             'code' => 'required|string|max:20|unique:categories,code',
@@ -30,20 +34,22 @@ class CategoryController extends Controller
             'description' => 'nullable|string|max:1000',
         ]);
 
+        $validated['client_id'] = Auth::user()->client_id;
+
         Category::create($validated);
 
-        return redirect()->route('categories.index')
+        return redirect()->route('categories.index', [ 'client' => $client])
             ->with('success', 'Category created successfully.');
     }
 
-    public function edit(Category $category)
+    public function edit($client, Category $category)
     {
         return Inertia::render('Categories/Edit', [
             'category' => $category
         ]);
     }
 
-    public function update(Request $request, Category $category)
+    public function update(Request $request, $client, Category $category)
     {
         $validated = $request->validate([
             'code' => 'required|string|max:20|unique:categories,code,' . $category->id,
@@ -53,18 +59,19 @@ class CategoryController extends Controller
 
         $category->update($validated);
 
-        return redirect()->route('categories.index')
+        return redirect()->route('categories.index', ['client' => $client])
             ->with('success', 'Category updated successfully.');
     }
 
-    public function destroy(Category $category)
+    public function destroy($client, Category $category)
     {
-        // if ($category->products()->count() > 0) {
-        //     return back()->withErrors(['delete' => 'Cannot delete category with products assigned.']);
-        // }
+        if ($category->products()->count() > 0) {
+            return back()->withErrors(['delete' => 'Cannot delete category with products assigned.']);
+        }
 
         $category->delete();
 
-        return back()->with('success', 'Category deleted.');
+        return redirect()->route('categories.index', ['client' => $client])
+            ->with('success', 'Category deleted.');
     }
 }

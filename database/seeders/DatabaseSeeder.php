@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,16 +14,14 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      */
+
+    protected static ?string $password;
+
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@gmail.com',
-        ]);
-        
-         $this->call([
+        $this->call([
+            ClientSeeder::class,
+            UserSeeder::class,
             ProductSeeder::class,
             ProjectSeeder::class,
             UnitSeeder::class,

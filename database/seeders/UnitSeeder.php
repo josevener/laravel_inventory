@@ -14,10 +14,10 @@ class UnitSeeder extends Seeder
     public function run(): void
     {
         Unit::insert([
-            ['name' => 'Piece', 'short_name' => 'Pc'],
-            ['name' => 'Box', 'short_name' => 'Box'],
-            ['name' => 'Kilogram', 'short_name' => 'Kg'],
-            ['name' => 'Liter', 'short_name' => 'Ltr'],
+            ['name' => 'Piece', 'short_name' => 'Pc', 'client_id' => 1],
+            ['name' => 'Box', 'short_name' => 'Box', 'client_id' => 1],
+            ['name' => 'Kilogram', 'short_name' => 'Kg', 'client_id' => 1],
+            ['name' => 'Liter', 'short_name' => 'Ltr', 'client_id' => 1],
         ]);
     }
 }

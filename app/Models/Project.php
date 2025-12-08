@@ -11,13 +11,14 @@ class Project extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'client_id',
         'code',
         'name',
         'company_name',
         'phone',
         'email',
         'address',
-        'gst_number',
+        'project_started',
         'is_active',
     ];
 
@@ -25,6 +26,11 @@ class Project extends Model
         'is_active' => 'boolean',
     ];
 
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+    
     public function gatePasses()
     {
         return $this->hasMany(InwardGatePass::class);

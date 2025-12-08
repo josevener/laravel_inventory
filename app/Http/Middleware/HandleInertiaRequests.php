@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Tighten\Ziggy\Ziggy;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -45,11 +46,31 @@ class HandleInertiaRequests extends Middleware
                     'email' => $request->user()->email,
                     'roles' => $request->user()->getRoleNames(),
                     'permissions' => $request->user()->getAllPermissions()->pluck('name'),
+                    'client' => $request->user()->client ? [
+                        'id' => $request->user()->client->id,
+                        'name' => $request->user()->client->name,
+                        'code' => $request->user()->client->code,
+                        'is_enable_inward_gatepass' => $request->user()->client->is_enable_inward_gatepass,
+                        'is_enable_outward_gatepass' => $request->user()->client->is_enable_outward_gatepass,
+                        'is_enable_warehouses' => $request->user()->client->is_enable_warehouses,
+                        'is_superadmin' => $request->user()->client->is_superadmin,
+                    ] : null,
                 ] : null,
             ],
             'flash' => [
                 'message' => fn () => $request->session()->get('message')
             ],
+
+            'ziggy' => function () use ($request) {
+                $ziggy = (new Ziggy)->toArray();
+            
+                if ($request->user() && $request->user()->client) {
+                    $ziggy['url'] = $request->url();
+                    // $ziggy['url'] = url($request->user()->client->code);
+                }
+            
+                return $ziggy;
+            },
         ]);
     }
 }

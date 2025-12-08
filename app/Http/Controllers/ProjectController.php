@@ -4,16 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ProjectController extends Controller
 {
     public function index()
     {
-        $projects = Project::withCount('gatePasses')
-            ->orderBy('company_name')
-            ->orderBy('name')
-            ->get();
+        $projects = Project::query()
+        ->where('client_id', Auth::user()->client_id)
+        ->withCount('gatePasses')
+        ->orderBy('company_name')
+        ->orderBy('name')
+        ->get();
 
         return Inertia::render('Projects/Index', [
             'projects' => $projects
@@ -25,50 +28,54 @@ class ProjectController extends Controller
         return Inertia::render('Projects/Create');
     }
 
-    public function store(Request $request)
+    public function store($client, Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'company_name' => 'nullable|string|max:150',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:100',
+            'code' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
+            'company_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
             'address' => 'nullable|string|max:500',
-            'gst_number' => 'nullable|string|max:20',
+            'project_started' => 'nullable|string|max:255',
             'is_active' => 'sometimes|boolean',
         ]);
 
+        $validated['client_id'] = Auth::user()->client_id;
+        
         Project::create($validated);
 
-        return redirect()->route('projects.index')
+        return redirect()->route('projects.index', ['client' => $client])
             ->with('success', 'Project created successfully.');
     }
 
-    public function edit(Project $project)
+    public function edit($client, Project $project)
     {
         return Inertia::render('Projects/Edit', [
             'project' => $project
         ]);
     }
 
-    public function update(Request $request, Project $project)
+    public function update(Request $request, $client, Project $project)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'company_name' => 'nullable|string|max:150',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:100',
+            'code' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
+            'company_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
             'address' => 'nullable|string|max:500',
-            'gst_number' => 'nullable|string|max:20',
+            'project_started' => 'nullable|string|max:255',
             'is_active' => 'sometimes|boolean',
         ]);
 
         $project->update($validated);
 
-        return redirect()->route('projects.index')
+        return redirect()->route('projects.index', ['client' => $client])
             ->with('success', 'Project updated.');
     }
 
-    public function destroy(Project $project)
+    public function destroy($client, Project $project)
     {
         if ($project->gatePasses()->exists()) {
             return back()->withErrors(['delete' => 'Cannot delete project with existing gate passes.']);
@@ -76,6 +83,7 @@ class ProjectController extends Controller
 
         $project->delete();
 
-        return back()->with('success', 'Project deleted.');
+        return redirect()->route('projects.index', ['client' => $client])
+            ->with('success', 'Project deleted.');
     }
 }

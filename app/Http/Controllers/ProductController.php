@@ -7,13 +7,15 @@ use App\Models\ProductSerial;
 use App\Models\Category;
 use App\Models\Unit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with(['category', 'unit', 'serials'])
+        $products = Product::where('client_id', Auth::user()->client_id)
+            ->with(['category', 'unit', 'serials'])
             ->orderBy('name')
             ->get();
 
@@ -25,12 +27,17 @@ class ProductController extends Controller
     public function create()
     {
         return Inertia::render('Products/Create', [
-            'categories' => Category::all(['id', 'name']),
-            'units' => Unit::all(['id', 'name', 'short_name']),
+            'categories' => Category::where('client_id', Auth::user()->client_id)
+                ->orderBy('name')
+                ->get(['id', 'name']),
+
+            'units' => Unit::where('client_id', Auth::user()->client_id)
+                ->orderBy('name')
+                ->get(['id', 'name', 'short_name']),
         ]);
     }
 
-    public function store(Request $request)
+    public function store($client, Request $request)
     {
         $validated = $request->validate([
             'sku' => 'required|string|max:50|unique:products,sku',
@@ -44,12 +51,15 @@ class ProductController extends Controller
             'description' => 'nullable|string',
         ]);
 
+        $validated['client_id'] = Auth::user()->client_id;
+
         Product::create($validated);
 
-        return redirect()->route('products.index')->with('success', 'Product created successfully.');
+        return redirect()->route('products.index', ['client' => $client])
+            ->with('success', 'Product created successfully.');
     }
 
-    public function show(Product $product)
+    public function show($client, Product $product)
     {
         $product->load(['category', 'unit', 'serials']);
 
@@ -58,18 +68,23 @@ class ProductController extends Controller
         ]);
     }
 
-    public function edit(Product $product)
+    public function edit($client, Product $product)
     {
         $product->load(['category', 'unit']);
-
+      
         return Inertia::render('Products/Edit', [
             'product' => $product,
-            'categories' => Category::select('id', 'name')->get(),
-            'units' => Unit::select('id', 'name', 'short_name')->get(),
+            'categories' => Category::where('client_id', Auth::user()->client_id)
+                ->orderBy('name')
+                ->get(['id', 'name']),
+
+            'units' => Unit::where('client_id', Auth::user()->client_id)
+                ->orderBy('name')
+                ->get(['id', 'name', 'short_name']),
         ]);
     }
 
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $client, Product $product)
     {
         $validated = $request->validate([
             'sku' => 'required|string|max:50|unique:products,sku,' . $product->id,
@@ -85,14 +100,16 @@ class ProductController extends Controller
 
         $product->update($validated);
 
-        return redirect()->route('products.index')->with('success', 'Product updated successfully.');
+        return redirect()->route('products.index', ['client' => $client])
+            ->with('success', 'Product updated successfully.');
     }
 
-    public function destroy(Product $product)
+    public function destroy($client, Product $product)
     {
         $product->delete();
 
-        return redirect()->route('products.index')->with('success', 'Product deleted.');
+        return redirect()->route('products.index', ['client' => $client])
+            ->with('success', 'Product deleted.');
     }
 
     public function search(Request $request)
@@ -100,8 +117,11 @@ class ProductController extends Controller
         $query = Product::query()
             ->with('unit')
             ->select('products.id', 'products.sku', 'products.name', 'products.reorder_level', 'unit_id')
-            ->where('sku', 'LIKE', "%{$request->q}%")
-            ->orWhere('name', 'LIKE', "%{$request->q}%");
+            ->where('client_id', Auth::user()->client_id)
+            ->where(function ($q) use ($request) {
+                $q->where('sku', 'LIKE', "%{$request->q}%")
+                    ->orWhere('name', 'LIKE', "%{$request->q}%");
+            });
 
         // if ($request->filled('warehouse_id')) {
         //     $query->addSelect([

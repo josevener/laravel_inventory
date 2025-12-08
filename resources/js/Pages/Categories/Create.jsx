@@ -7,6 +7,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { ArrowLeft } from "lucide-react"
 import { Link } from "@inertiajs/react"
 import { Card, CardContent } from "@/components/ui/card"
+import { useSafeRoute } from "@/hooks/useSafeRoute"
 
 export default function Create() {
   const { data, setData, post, processing, errors } = useForm({
@@ -14,22 +15,21 @@ export default function Create() {
     name: "",
     description: "",
   })
+  const safeRoute = useSafeRoute()
 
   const submit = (e) => {
     e.preventDefault()
-    post(route("categories.store"))
+    post(safeRoute("categories.store"))
   }
 
   return (
-    <AuthenticatedLayout>
+    <AuthenticatedLayout
+      breadCrumbLink={safeRoute("categories.index")}
+      breadCrumbLinkText="Categories"
+      breadCrumbPage="Create Category"
+    >
       <div className="w-full mx-auto space-y-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={route("categories.index")}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Link>
-          </Button>
           <h1 className="text-3xl font-bold">Create Category</h1>
         </div>
 
@@ -41,7 +41,7 @@ export default function Create() {
                 <Input
                   id="code"
                   value={data.code}
-                  onChange={(e) => setData("code", e.target.value.toUpperCase())}
+                  onChange={(e) => setData("code", e.target.value)}
                   placeholder="CAT-001"
                 />
                 {errors.code && <p className="text-sm text-destructive mt-1">{errors.code}</p>}
@@ -74,7 +74,7 @@ export default function Create() {
                   {processing ? "Creating..." : "Create Category"}
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href={route("categories.index")}>Cancel</Link>
+                  <Link href={safeRoute("categories.index")}>Cancel</Link>
                 </Button>
               </div>
             </form>

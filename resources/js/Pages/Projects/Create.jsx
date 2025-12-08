@@ -8,33 +8,34 @@ import { Card, CardContent } from "@/components/ui/card"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { ArrowLeft, Building2 } from "lucide-react"
 import { Link } from "@inertiajs/react"
+import { useSafeRoute } from "@/hooks/useSafeRoute"
 
 export default function Create() {
   const { data, setData, post, processing, errors } = useForm({
+    code: "",
     name: "",
     company_name: "",
     phone: "",
     email: "",
     address: "",
-    gst_number: "",
+    project_started: "",
     is_active: true,
   })
+  const safeRoute = useSafeRoute()
 
   const submit = (e) => {
     e.preventDefault()
-    post(route("projects.store"))
+    post(safeRoute("projects.store"))
   }
 
   return (
-    <AuthenticatedLayout>
+    <AuthenticatedLayout
+      breadCrumbLink={safeRoute("projects.index")}
+      breadCrumbLinkText="Projects"
+      breadCrumbPage="Create Project"
+    >
       <div className="w-full mx-auto">
         <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={route("projects.index")}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Link>
-          </Button>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Building2 className="h-8 w-8" />
             Add New Project
@@ -46,14 +47,14 @@ export default function Create() {
             <form onSubmit={submit} className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="name">Contact Person *</Label>
+                  <Label htmlFor="name">Code *</Label>
                   <Input
-                    id="name"
-                    value={data.name}
-                    onChange={(e) => setData("name", e.target.value)}
-                    placeholder="John Doe"
+                    id="code"
+                    value={data.code}
+                    onChange={(e) => setData("code", e.target.value)}
+                    placeholder="e.g., ABC123"
                   />
-                  {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
+                  {errors.code && <p className="text-sm text-destructive mt-1">{errors.code}</p>}
                 </div>
 
                 <div>
@@ -91,13 +92,24 @@ export default function Create() {
 
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="gst_number">GST Number</Label>
+                  <Label htmlFor="project_started">Project Started</Label>
                   <Input
-                    id="gst_number"
-                    value={data.gst_number}
-                    onChange={(e) => setData("gst_number", e.target.value.toUpperCase())}
-                    placeholder="22AAAAA0000A1Z5"
+                    id="project_started"
+                    value={data.project_started}
+                    onChange={(e) => setData("project_started", e.target.value)}
+                    placeholder="C-2025-01-01"
                   />
+                </div>
+
+                <div>
+                  <Label htmlFor="name">Contact Person *</Label>
+                  <Input
+                    id="name"
+                    value={data.name}
+                    onChange={(e) => setData("name", e.target.value)}
+                    placeholder="John Doe"
+                  />
+                  {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
                 </div>
 
                 <div>
@@ -126,7 +138,7 @@ export default function Create() {
                   {processing ? "Creating..." : "Create Project"}
                 </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <Link href={route("projects.index")}>Cancel</Link>
+                  <Link href={safeRoute("projects.index")}>Cancel</Link>
                 </Button>
               </div>
             </form>
