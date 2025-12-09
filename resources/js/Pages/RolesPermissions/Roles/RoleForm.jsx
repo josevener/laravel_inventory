@@ -18,14 +18,13 @@ export default function RoleForm({ role = null, permissions, rolePermissions = [
   const isEdit = !!role
   const safeRoute = useSafeRoute()
 
-  const { data, setData, post, put, processing, errors } = useForm({
+  const { data, setData, post, put, processing, errors, reset } = useForm({
     name: role?.name || "",
-    permissions: rolePermissions,
+    permissions: rolePermissions.map(p => p.id || p), // ensure we store IDs only
   })
 
   const togglePermission = (id) => {
-    setData(
-      "permissions",
+    setData("permissions", 
       data.permissions.includes(id)
         ? data.permissions.filter((p) => p !== id)
         : [...data.permissions, id]
@@ -37,17 +36,23 @@ export default function RoleForm({ role = null, permissions, rolePermissions = [
     const hasAllSelected = allIds.every(id => data.permissions.includes(id))
 
     if (hasAllSelected) {
+      // Remove all from this subgroup
       setData("permissions", data.permissions.filter(id => !allIds.includes(id)))
     } else {
+      // Add all missing ones
       setData("permissions", Array.from(new Set([...data.permissions, ...allIds])))
     }
   }
 
   const submit = (e) => {
     e.preventDefault()
-    isEdit
-      ? put(safeRoute("roles.update", { role: role.id }))
-      : post(safeRoute("roles.store"))
+    if (isEdit) {
+      put(safeRoute("roles.update", { role: role.id }))
+    } else {
+      post(safeRoute("roles.store"), {
+        onSuccess: () => reset(), // optional: clear form after success
+      })
+    }
   }
 
   return (
@@ -56,7 +61,8 @@ export default function RoleForm({ role = null, permissions, rolePermissions = [
       breadCrumbLinkText="Roles"
       breadCrumbPage={isEdit ? "Edit Role" : "Create Role"}
     >
-      <div className="w-full mx-auto space-y-6">
+      {/* WRAP EVERYTHING IN A <form> TAG */}
+      <form onSubmit={submit} className="w-full mx-auto space-y-6">
         {/* Role Name */}
         <Card>
           <CardHeader>
@@ -67,6 +73,7 @@ export default function RoleForm({ role = null, permissions, rolePermissions = [
               value={data.name}
               onChange={(e) => setData("name", e.target.value)}
               placeholder="e.g. Warehouse Manager"
+              required
             />
             {errors.name && <p className="text-sm text-destructive mt-2">{errors.name}</p>}
           </CardContent>
@@ -85,21 +92,23 @@ export default function RoleForm({ role = null, permissions, rolePermissions = [
                     {groupName}
                   </AccordionTrigger>
 
-                  <AccordionContent className="pt-2 pl-4 space-y-2">
+                  <AccordionContent className="pt-2 pl-4 space-y-4">
                     {Object.entries(subgroups).map(([subgroupName, perms]) => (
                       <AccordionItem key={subgroupName || "default"} value={subgroupName || "default"}>
                         <AccordionTrigger className="font-medium bg-gray-100 p-2 rounded-md flex items-center justify-start gap-4">
-                          {/* Subgroup Select All */}
+                          {/* Subgroup "Select All" Checkbox */}
                           <Checkbox
                             checked={perms.every(p => data.permissions.includes(p.id))}
+                            indeterminate={
+                              !perms.every(p => data.permissions.includes(p.id)) &&
+                              perms.some(p => data.permissions.includes(p.id))
+                            }
                             onCheckedChange={() => toggleSubgroup(perms)}
-                            className="ml-2"
                           />
-
-                          <span>{subgroupName ?? "General"}</span>
+                          <span>{subgroupName || "General"}</span>
                         </AccordionTrigger>
 
-                        <AccordionContent className="pl-4 pt-2 grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <AccordionContent className="pl-8 pt-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                           {perms.map((perm) => (
                             <div
                               key={perm.id}
@@ -110,7 +119,7 @@ export default function RoleForm({ role = null, permissions, rolePermissions = [
                                 checked={data.permissions.includes(perm.id)}
                                 onCheckedChange={() => togglePermission(perm.id)}
                               />
-                              <Label htmlFor={`perm-${perm.id}`} className="cursor-pointer">
+                              <Label htmlFor={`perm-${perm.id}`} className="cursor-pointer text-sm">
                                 {perm.name}
                               </Label>
                             </div>
@@ -130,11 +139,11 @@ export default function RoleForm({ role = null, permissions, rolePermissions = [
           <Button type="submit" size="lg" disabled={processing}>
             {processing ? "Saving..." : isEdit ? "Update Role" : "Create Role"}
           </Button>
-          <Button variant="outline" asChild>
+          <Button type="button" variant="outline" asChild>
             <Link href={safeRoute("roles.index")}>Cancel</Link>
           </Button>
         </div>
-      </div>
+      </form>
     </AuthenticatedLayout>
   )
 }

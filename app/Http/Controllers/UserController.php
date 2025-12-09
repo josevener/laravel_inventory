@@ -46,7 +46,8 @@ class UserController extends Controller
     public function create()
     {
         $clients = Client::orderBy('name')->get(['id', 'name', 'code']);
-        $roles = Role::all(['id', 'name']);
+        $roles = Role::where('client_id', Auth::user()->client_id)
+            ->get(['id', 'name']);
 
         return Inertia::render('Users/UserForm', [
             'clients' => $clients,
@@ -82,7 +83,8 @@ class UserController extends Controller
     {
         $user->load('roles');
         $clients = Client::orderBy('name')->get(['id', 'name', 'code']);
-        $roles = Role::all(['id', 'name']);
+        $roles = Role::where('client_id', Auth::user()->client_id)
+            ->get(['id', 'name']);
 
         return Inertia::render('Users/UserForm', [
             'user' => [

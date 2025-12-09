@@ -57,7 +57,8 @@ class PullOutController extends Controller
         $today = now()->startOfDay();
 
         // Count how many pull outs were created today
-        $todayCount = PullOut::whereDate('created_at', $today)->count();
+        $todayCount = PullOut::where('client_id', Auth::user()->client_id)
+                ->whereDate('created_at', $today)->count();
 
         // Start from 3000 every day
         $nextNumber = 3000 + $todayCount;

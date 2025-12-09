@@ -27,9 +27,9 @@ class RoleController extends Controller
     {
         $query = Permission::query();
 
-        // If NOT superadmin → hide Manage Companies
+        // If NOT superadmin → hide Companies
         if (!Auth::user()->client->is_superadmin) {
-            $query->where('name', '!=', 'Manage Companies');
+            $query->where('subgroup', '!=', 'Companies');
         }
 
         // Nested grouping: group → subgroup → permissions
@@ -70,7 +70,7 @@ class RoleController extends Controller
         $query = Permission::query();
 
         if (!Auth::user()->client->is_superadmin) {
-            $query->where('name', '!=', 'Manage Companies');
+            $query->where('subgroup', '!=', 'Companies');
         }
 
         // Nested grouping: group → subgroup → permissions
