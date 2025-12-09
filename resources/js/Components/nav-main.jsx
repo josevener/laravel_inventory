@@ -22,7 +22,9 @@ export function NavMain({ items, currentUrl }) {
                   <SidebarMenuItem key={sub.title}>
                     <SidebarMenuButton asChild isActive={currentUrl === sub.url}>
                       <a href={sub.url}>
+                        {sub.icon && <sub.icon />}
                         <span>{sub.title}</span>
+                        {sub.badge && <SidebarMenuBadge>{sub.badge}</SidebarMenuBadge>}
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

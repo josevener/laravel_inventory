@@ -4,12 +4,16 @@ import { usePage } from "@inertiajs/react"
 import {
   LayoutDashboard,
   Package,
-  Truck,
   FileText,
   UserCheck,
   Factory,
   Users,
   Shield,
+  Boxes,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Combine,
+  ChartBarStacked,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -39,28 +43,53 @@ export function AppSidebar({ ...props }) {
   const hasPermission = (perm) => !perm || userPermissions.includes(perm)
 
   const clientCode = auth?.user?.client?.code;
+  const isSuperAdmin = auth?.user?.client?.is_superadmin === true
+  const hasViewCompanies = userPermissions.includes("View Companies")
 
   const navMain = [
-    { title: "Dashboard", url: "dashboard", icon: LayoutDashboard, permission: "View Dashboard" },
-    { title: "Products", url: "products", icon: Package, permission: "View Products" },
-    { title: "Inward Gate Pass", url: "gatepass/inward", icon: Truck, badge: "IN", permission: "View Inward Gatepass" },
-    { title: "Pull Out", url: "pull_out", icon: Truck, permission: "View Outward Gatepass" },
-    // { title: "Stock Transfer", url: "/transfer", icon: ArrowLeftRight, permission: "manage stock transfer" },
-    // { title: "Stock Adjustment", url: "/adjustment", icon: AlertCircle, permission: "adjust stock" },
     {
-      group: "Masters",
+      group: "Productivity",
       items: [
-        { title: "Categories", url: "categories", permission: "View Categories" },
-        { title: "Projects", url: "projects", permission: "View Projects" },
-        { title: "Units", url: "units", permission: "View Units" },
+        { title: "Dashboard", url: "dashboard", icon: LayoutDashboard, permission: "View Dashboard" },
       ],
     },
-    { title: "Users", url: "users", icon: UserCheck, permission: "View Users" },
-    { title: "Companies", url: "companies", icon: Users, permission: "View Companies" },
-    { title: "Roles & Permissions", url: "roles-permissions", icon: Shield, permission: "View Reports" },
+    {
+      group: "Maintenance",
+      items: [
+        { title: "Products", url: "products", icon: Package, permission: "View Products" },
+        { title: "Inward Gate Pass", url: "gatepass/inward", icon: ArrowDownLeft, badge: "IN", permission: "View Inward Gatepass" },
+        { title: "Pull Out", url: "pull_out", icon: ArrowUpRight, badge: "OUT", permission: "View Outward Gatepass" },
+        { title: "Projects", url: "projects", icon: Boxes, permission: "View Projects" },
+        { title: "Users", url: "users", icon: UserCheck, permission: "View Users" },
+        // Show Companies if superadmin OR has permission
+        ...(isSuperAdmin && hasViewCompanies
+          ? [{
+              title: "Companies",
+              url: "companies",
+              icon: Users,
+              permission: "View Companies"
+            }]
+          : []),
+        { title: "Roles & Permissions", url: "roles-permissions", icon: Shield, permission: "View Reports" },
+        // { title: "Stock Transfer", url: "/transfer", icon: ArrowLeftRight, permission: "manage stock transfer" },
+        // { title: "Stock Adjustment", url: "/adjustment", icon: AlertCircle, permission: "adjust stock" },
+      ],
+    },
+    {
+      group: "Catalogs",
+      items: [
+        { title: "Categories", url: "categories", icon: ChartBarStacked, permission: "View Categories" },
+        { title: "Units", url: "units", icon: Combine, permission: "View Units" },
+      ],
+    },
     // { title: "Roles", url: "roles-permissions/roles", icon: FileText, permission: "view reports" },
     // { title: "Permissions", url: "roles-permissions/permissions", icon: Shield, permission: "view reports" },
-    { title: "Reports", url: "reports", icon: FileText, permission: "View Reports" },
+    {
+      group: "Reports",
+      items: [
+        { title: "Reports", url: "reports", icon: FileText, permission: "View Reports" },
+      ]
+    }
   ].map((item) => {
     if (item.items) {
       return {
