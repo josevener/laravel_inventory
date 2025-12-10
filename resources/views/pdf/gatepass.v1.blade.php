@@ -12,7 +12,7 @@
 
         body {
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 9pt;
+            font-size: 11pt;
             margin: 30px 40px;
         }
 
@@ -27,7 +27,7 @@
             width: 100%; 
             height: 80px; 
             /* Added margin-bottom to ensure QR doesn't overlap body */
-            margin-bottom: 10px; 
+            margin-bottom: 20px; 
         }
 
         /* NEW: QR CODE LEFT ALIGNMENT */
@@ -61,7 +61,7 @@
         
         /* COMPACT HEADER STYLES */
         .company-name {
-            font-size: 20pt;
+            font-size: 16pt;
             font-weight: bold;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -76,7 +76,7 @@
         }
 
         .doc-title {
-            font-size: 18pt;
+            font-size: 20pt;
             font-weight: bold;
             text-transform: uppercase;
             margin-top: 0px;
@@ -94,7 +94,7 @@
         .auth-wrapper {
             margin-bottom: 10px;
             width: 100%;
-            margin-top: 10px; 
+            margin-top: 30px; 
         }
 
         .auth-line {
@@ -125,14 +125,14 @@
             text-align: left;
             font-weight: bold;
             text-transform: uppercase;
-            font-size: 9pt;
+            font-size: 10pt;
             background-color: #f9f9f9;
         }
 
         .item-table td {
             padding: 6px 5px;
             vertical-align: top;
-            font-size: 8pt;
+            font-size: 10pt;
         }
 
         .item-table th:first-child, .item-table td:first-child {
@@ -190,11 +190,11 @@
             vertical-align: bottom;
         }
 
-        .label-col { width: 90px; font-weight: bold; font-size: 9pt; }
+        .label-col { width: 90px; font-weight: bold; font-size: 10pt; }
         .colon-col { width: 10px; font-weight: bold; }
         .line-col {
             border-bottom: 1px solid black;
-            height: 16px;
+            height: 18px;
             position: relative;
         }
 

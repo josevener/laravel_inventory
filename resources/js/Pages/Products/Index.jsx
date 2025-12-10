@@ -142,7 +142,7 @@ export default function ProductsIndex({ products: initialProducts }) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="rounded-md border overflow-hidden">
+            <div className="rounded-md border max-h-[calc(100vh-280px)] overflow-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
