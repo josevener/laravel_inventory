@@ -1,6 +1,6 @@
 // resources/js/Pages/Products/Index.jsx
 import React, { useState } from "react"
-import { Head, Link, router } from "@inertiajs/react"
+import { Head, Link, router, usePage } from "@inertiajs/react"
 import { Plus, Package, AlertTriangle, Edit, Trash2, Search, SquareArrowOutUpRight } from "lucide-react"
 import {
   Table,
@@ -56,18 +56,10 @@ export default function ProductsIndex({ products: initialProducts }) {
   }
 
   const handleDelete = () => {
-    router.delete(
-      safeRoute("products.destroy", { product: deletingProduct.id }),
-      {
-        onSuccess: () => {
-          toast({ title: "Success", description: "Product deleted!" })
-        },
-        onError: () => {
-          toast({ variant: "destructive", title: "Error", description: "Cannot delete product." })
-        },
-        onFinish: () => setDeleteDialogOpen(false),
-      }
-    )
+    router.delete(safeRoute("products.destroy", { product: deletingProduct.id }), {
+      onFinish: () => setDeleteDialogOpen(false),
+      preserveScroll: true,
+    })
   }
 
   return (

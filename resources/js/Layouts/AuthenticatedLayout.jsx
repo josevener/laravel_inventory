@@ -3,6 +3,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Separator } from "@/Components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/Components/ui/sidebar";
 import { Toaster } from "@/Components/ui/toaster";
+import { useFlashToast } from "@/hooks/useFlashToast";
 
 export default function AuthenticatedLayout({ 
     breadCrumbLink,
@@ -13,6 +14,8 @@ export default function AuthenticatedLayout({
     // const user = usePage().props.auth.user;
 
     // const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+    
+    useFlashToast()
 
     return (
         <SidebarProvider>
