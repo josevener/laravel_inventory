@@ -33,7 +33,7 @@ class Project extends Model
     
     public function gatePasses()
     {
-        return $this->hasMany(InwardGatePass::class);
+        return $this->hasMany(GatePass::class);
     }
 
     public function scopeActive($query)

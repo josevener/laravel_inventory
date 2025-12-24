@@ -17,15 +17,15 @@ class Client extends Model
         'email',
         'phone',
         'address',
-        "is_enable_inward_gatepass",
-        "is_enable_outward_gatepass",
+        "is_enable_dispatch_gatepass",
+        "is_enable_pullout_gatepass",
         'is_enable_warehouses',
         "is_superadmin",
     ];
 
     protected $casts = [
-        "is_enable_inward_gatepass"=> "boolean",
-        "is_enable_outward_gatepass"=> "boolean",
+        "is_enable_dispatch_gatepass"=> "boolean",
+        "is_enable_pullout_gatepass"=> "boolean",
     ];
 
     public function users()
@@ -38,14 +38,9 @@ class Client extends Model
         return $this->hasMany(Product::class);
     }
 
-    public function inwardGatePass()
+    public function gatePasses()
     {
-        return $this->hasMany(InwardGatePass::class);
-    }
-
-    public function outwardGatePass()
-    {
-        return $this->hasMany(OutwardGatePass::class);
+        return $this->hasMany(GatePass::class);
     }
 
     public function projects()

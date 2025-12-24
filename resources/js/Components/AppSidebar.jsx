@@ -43,7 +43,7 @@ export function AppSidebar({ ...props }) {
   const hasPermission = (perm) => !perm || userPermissions.includes(perm)
 
   const clientCode = auth?.user?.client?.code;
-  const isSuperAdmin = auth?.user?.client?.is_superadmin === true
+  const isSuperAdmin = auth?.user?.client?.is_superadmin ? true : false;
   const hasViewCompanies = userPermissions.includes("View Companies")
 
   const navMain = [
@@ -57,8 +57,8 @@ export function AppSidebar({ ...props }) {
       group: "Maintenance",
       items: [
         { title: "Products", url: "products", icon: Package, permission: "View Products" },
-        { title: "Inward Gate Pass", url: "gatepass/inward", icon: ArrowDownLeft, badge: "IN", permission: "View Inward Gatepass" },
-        { title: "Pull Out", url: "pull_out", icon: ArrowUpRight, badge: "OUT", permission: "View Outward Gatepass" },
+        { title: "Dispatch", url: "gatepass/dispatch", icon: ArrowDownLeft, badge: "OUT", permission: "View Dispatch Gatepass" },
+        { title: "Pull Out", url: "gatepass/pullout", icon: ArrowUpRight, badge: "IN", permission: "View Pull Out Gatepass" },
         { title: "Projects", url: "projects", icon: Boxes, permission: "View Projects" },
         { title: "Users", url: "users", icon: UserCheck, permission: "View Users" },
         // Show Companies if superadmin OR has permission
@@ -123,7 +123,7 @@ export function AppSidebar({ ...props }) {
 
       <SidebarFooter>
         <NavUser user={{
-          name: auth?.user?.name || "Guest",
+          name: `${auth?.user?.first_name} ${auth?.user?.last_name}` || "Guest",
           email: auth?.user?.email || "",
           avatar: "/avatars/default.jpg",
         }} />

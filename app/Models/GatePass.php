@@ -5,21 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Project;
-use App\Models\Warehouse;
 use App\Models\User;
-use App\Models\InwardGatePassItem;
+use App\Models\GatePassItem;
 
-class InwardGatePass extends Model
+class GatePass extends Model
 {
-    /** @use HasFactory<\Database\Factories\InwardGatePassFactory> */
+    /** @use HasFactory<\Database\Factories\GatePassFactory> */
     use HasFactory;
 
     protected $fillable = [
         'client_id',
         'gate_pass_no',
+        'type',
         'project_id',
-        'vehicle_no',
-        'driver_name',
+        'authorized_bearer',
         'remarks',
         'status',
         'received_by',
@@ -51,7 +50,7 @@ class InwardGatePass extends Model
 
     public function items()
     {
-        return $this->hasMany(InwardGatePassItem::class);
+        return $this->hasMany(GatePassItem::class);
     }
 
     public function client()

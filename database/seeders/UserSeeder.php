@@ -16,7 +16,8 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::create([
-            'name' => 'Zentrix Solutions',
+            'first_name' => 'Zentrix',
+            'last_name' => 'Solutions',
             'email' => 'zentrixsolutions@gmail.com',
             'email_verified_at' => now(),
             'remember_token' => Str::random(10),
@@ -25,7 +26,8 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'SSI Metal Corp.',
+            'first_name' => 'SSI Metal',
+            'last_name' => 'Corp.',
             'email' => 'admin@gmail.com',
             'email_verified_at' => now(),
             'remember_token' => Str::random(10),

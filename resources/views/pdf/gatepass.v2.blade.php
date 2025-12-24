@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>SSI Metal Corp - Gate Pass {{ $gatePass->gate_pass_no }}</title>
     <style>
+        /* PDF PAGE SETTINGS */
         @page {
             margin: 0px;
             size: letter;
@@ -15,25 +16,29 @@
             margin: 30px 40px;
         }
 
+        /* HELPER CLASSES */
         .bold { font-weight: bold; }
         .italic { font-style: italic; }
         .text-center { text-align: center; }
 
-        /* HEADER */
+        /* HEADER LAYOUT */
         .header-container {
-            position: relative;
-            width: 100%;
-            height: 80px;
+            position: relative; 
+            width: 100%; 
+            height: 80px; 
+            /* Added margin-bottom to ensure QR doesn't overlap body */
+            margin-bottom: 10px; 
         }
 
+        /* NEW: QR CODE LEFT ALIGNMENT */
         .header-left {
             position: absolute;
             left: 0;
-            top: 5px;
+            top: 5px; /* Slight offset to align nicely with text */
         }
 
         .qr-code-img {
-            width: 70px;
+            width: 70px; /* Adjust size here */
             height: 70px;
         }
 
@@ -43,6 +48,7 @@
             position: absolute;
             top: 0;
             left: 0;
+            z-index: -1; /* Ensures it sits behind if overlapping, though it shouldn't */
         }
 
         .header-right {
@@ -52,63 +58,51 @@
             text-align: right;
             width: 200px;
         }
-
+        
+        /* COMPACT HEADER STYLES */
         .company-name {
             font-size: 20pt;
             font-weight: bold;
             letter-spacing: 1px;
             text-transform: uppercase;
-            margin-bottom: 0;
+            margin-bottom: 0px;
             line-height: 1.2;
         }
 
         .location-name {
             font-size: 10pt;
             margin-bottom: 2px;
+            line-height: 1;
         }
 
         .doc-title {
             font-size: 18pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin-top: 0;
+            margin-top: 0px;
             line-height: 1.2;
         }
 
+        /* LARGE CONTROL NUMBER STYLE */
         .control-number-large {
             font-size: 24pt;
             font-weight: bold;
+            color: #000;
         }
 
-        /* INLINE DATE */
-        .date-line {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 8px;
-            margin-top: 8px;
-            font-size: 10pt;
-        }
-
-        .date-underline {
-            border-bottom: 1px solid black;
-            min-width: 120px;
-            text-align: center;
-            padding: 0 5px;
-            font-weight: bold;
-        }
-
-        /* AUTH SECTION */
+        /* AUTH TEXT WRAPPER */
         .auth-wrapper {
+            margin-bottom: 10px;
             width: 100%;
-            margin-top: 5px; 
+            margin-top: 10px; 
         }
 
         .auth-line {
             margin-bottom: 8px;
+            width: 100%;
             line-height: 1.5;
         }
-
+        
         .input-fill {
             border-bottom: 1px solid black;
             display: inline-block;
@@ -116,11 +110,12 @@
             text-align: center;
         }
 
-        /* ITEMS TABLE - REDUCED BOTTOM MARGIN */
+        /* MAIN ITEMS TABLE */
         .item-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 15px 0 0 0; /* Removed bottom margin */
+            margin-top: 15px;
+            margin-bottom: 15px;
         }
 
         .item-table th {
@@ -135,44 +130,33 @@
         }
 
         .item-table td {
-            padding: 6px 5px; /* Slightly reduced vertical padding */
+            padding: 6px 5px;
             vertical-align: top;
             font-size: 8pt;
         }
 
-        .item-table th:first-child,
-        .item-table td:first-child {
+        .item-table th:first-child, .item-table td:first-child {
             text-align: center;
-            width: 18%;
+            width: 15%;
         }
 
-        .item-table th:last-child,
-        .item-table td:last-child {
-            text-align: right;
-            width: 28%;
-            padding-right: 10px;
-        }
-
-        .intended-for-text {
-            position: absolute;
-            font-weight: bold;
-            font-size: 9pt;
-            color: #000;
-            text-align: right;
-            line-height: 1.3;
-            pointer-events: none;
-        }
-
-        /* HASH LINE - MINIMAL TOP MARGIN ONLY */
+        /* SEPARATOR */
         .hash-line {
             text-align: center;
             color: #555;
             font-size: 9pt;
-            margin: 8px 0 20px 0; /* Only 8px top, keeps it tight to table */
+            margin: 20px 0;
             letter-spacing: -1px;
         }
 
-        /* FOOTER */
+        .project-ref {
+            text-align: right;
+            font-size: 9pt;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* FOOTER LAYOUT */
         .footer-wrap {
             width: 100%;
             border-top: 1px solid black;
@@ -194,12 +178,13 @@
         .col-right { float: right; width: 48%; }
         .clearfix::after { content: ""; clear: both; display: table; }
 
+        /* SIGNATURE ROWS */
         table.sig-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 5px;
         }
-
+        
         table.sig-table td {
             padding-bottom: 5px;
             vertical-align: bottom;
@@ -220,6 +205,7 @@
             font-weight: normal;
         }
 
+        /* Signature Overlay */
         .signature-overlay {
             position: absolute;
             right: 0px;
@@ -233,8 +219,11 @@
 <body>
 
     <div class="header-container">
+        
         <div class="header-left">
-            <img src="data:image/svg+xml;base64,{{ $qrCode }}" class="qr-code-img" alt="QR Code">
+            <img src="data:image/svg+xml;base64,{{ $qrCode }}" 
+                class="qr-code-img" 
+                alt="QR Code">
         </div>
 
         <div class="header-center">
@@ -244,15 +233,17 @@
         </div>
 
         <div class="header-right">
-            <div class="control-number-large">{{ $gatePass->gate_pass_no }}</div>
-            
-            <div class="date-line">
+            <div style="margin-bottom: 5px;">
+                <span class="control-number-large">{{ $gatePass->gate_pass_no }}</span>
+            </div>
+            <div>
                 <span>Date:</span>
-                <span class="date-underline">
+                <span style="border-bottom: 1px solid black; display: inline-block; min-width: 100px; text-align: center;">
                     {{ \Carbon\Carbon::parse($gatePass->created_at)->format('F d, Y') }}
                 </span>
             </div>
         </div>
+
     </div>
 
     <div class="auth-wrapper">
@@ -262,7 +253,7 @@
 
         <div class="auth-line">
             This will authorize the bearer: 
-            <span class="input-fill" style="width: 73%;">{{ $gatePass->authorized_bearer ?? '—' }}</span>
+            <span class="input-fill" style="width: 73%;">{{ $gatePass->driver_name ?? '—' }}</span>
         </div>
         
         <div class="auth-line">
@@ -281,29 +272,23 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($gatePass->items as $index => $item)
+            @foreach($gatePass->items as $index => $item)
                 <tr>
                     <td style="font-weight: bold;">*{{ $item->quantity }} {{ $item->product->unit->short_name ?? 'Pc' }}</td>
                     <td style="font-weight: bold;">*{{ $item->product->name }} {{ $item->product->sku }}</td>
-                    <td>
-                        @if ($loop->remaining === 1 && $gatePass->project)
-                            <div class="intended-for-text">
-                                *For {{ $gatePass->project->company_name }} Project<br>
-                                <small>{{ $gatePass->project->project_started ?? "C-" . $gatePass->project->created_at->format('Y-m-d') }}</small>
-                            </div>
-                        @endif
-                    </td>
+                    <td></td>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="3" class="text-center italic">No items</td>
-                </tr>
-            @endforelse
+            @endforeach
         </tbody>
     </table>
 
     <div class="hash-line">
         ################################################## nothing follows ##################################################
+    </div>
+
+    <div class="project-ref">
+        <div>*For {{ $gatePass->project->company_name }} Project</div>
+        <div>{{ $gatePass->project->project_started ?? "C-" . $gatePass->project->created_at->format('Y-m-d')}}</div>
     </div>
 
     <div class="footer-wrap clearfix">
@@ -329,13 +314,14 @@
                 <tr>
                     <td colspan="3" class="text-center" style="font-size: 8pt; padding-top:2px;">(GUARD on DUTY)</td>
                 </tr>
+                <tr><td colspan="3" style="height: 10px;"></td></tr> 
                 <tr>
                     <td class="label-col">Received by</td>
                     <td class="colon-col">:</td>
                     <td class="line-col"></td>
                 </tr>
                 <tr>
-                    <td colspan="3" style="font-size: 8pt; font-style: italic; text-align: center;">Signature over Printed Name</td>
+                    <td colspan="3" style="font-size: 8pt; font-style: italic;">Signature over Printed Name</td>
                 </tr>
             </table>
         </div>

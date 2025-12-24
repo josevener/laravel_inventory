@@ -25,8 +25,8 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             ProjectSeeder::class,
             UnitSeeder::class,
-            InwardGatePassSeeder::class,
-            InwardGatePassItemSeeder::class,
+            GatePassSeeder::class,
+            GatePassItemSeeder::class,
             WarehouseSeeder::class,
             RolePermissionSeeder::class,
         ]);

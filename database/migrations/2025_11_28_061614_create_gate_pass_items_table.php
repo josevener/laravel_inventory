@@ -11,17 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('inward_gate_pass_items', function (Blueprint $table) {
+        Schema::create('gate_pass_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
-            $table->foreignId('inward_gate_pass_id')->constrained('inward_gate_passes')->onDelete('cascade');
+            $table->foreignId('client_id')->constrained('clients')->restrictOnDelete();
+            $table->foreignId('gate_pass_id')->constrained('gate_passes')->restrictOnDelete();
             $table->foreignId('product_id')->constrained('products');
             $table->integer('quantity');
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             // Add indexes for faster queries
             $table->index('client_id');
-            $table->index('inward_gate_pass_id');
+            $table->index('gate_pass_id');
             $table->index('product_id');
         });
     }
@@ -31,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('inward_gate_pass_items');
+        Schema::dropIfExists('gatepass_items');
     }
 };

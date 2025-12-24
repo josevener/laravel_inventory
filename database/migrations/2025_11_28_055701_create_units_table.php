@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
             $table->string('name')->index(); // Piece, Kilogram, Liter
             $table->string('short_name'); // Pc, Kg, Ltr
+            $table->boolean('is_active')->default(true);
             $table->softDeletes();
             $table->timestamps();
 

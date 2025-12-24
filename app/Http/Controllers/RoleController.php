@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
@@ -46,10 +47,21 @@ class RoleController extends Controller
 
     public function store($client, Request $request)
     {
+        $clientId = Auth::user()->client_id;
+
         $validated = $request->validate([
-            'name' => 'required|string|max:50|unique:roles,name',
+            'name' => [
+            'required',
+            'string',
+            'max:50',
+            Rule::unique('roles')
+                ->where(fn ($q) => $q->where('client_id', $clientId)),
+            ],
             'permissions' => 'required|array',
-            'permissions.*' => 'exists:permissions,id',
+            'permissions.*' => [
+                'integer',
+                Rule::exists('permissions', 'id')
+            ],
         ]);
 
         $role = Role::create([
@@ -90,7 +102,14 @@ class RoleController extends Controller
     public function update(Request $request, $client, Role $role)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:50|unique:roles,name,' . $role->id,
+            'name' => [
+            'required',
+            'string',
+            'max:50',
+            Rule::unique('roles')
+                ->where(fn ($q) => $q->where('client_id', Auth::user()->client_id))
+                ->ignore($role->id),
+             ],
             'permissions' => 'required|array',
             'permissions.*' => 'exists:permissions,id',
         ]);

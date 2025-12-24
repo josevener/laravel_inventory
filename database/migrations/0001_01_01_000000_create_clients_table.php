@@ -19,10 +19,11 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->text('address')->nullable();
-            $table->boolean('is_enable_inward_gatepass')->default(false);
-            $table->boolean('is_enable_outward_gatepass')->default(false);
+            $table->boolean('is_enable_dispatch_gatepass')->default(false);
+            $table->boolean('is_enable_pullout_gatepass')->default(false);
             $table->boolean('is_enable_warehouses')->default(false);
             $table->boolean('is_superadmin')->default(false);
+            $table->boolean('is_active')->default(true);
             $table->softDeletes();
             $table->timestamps();
         });

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('warehouse_id')->constrained('warehouses')->onDelete('cascade');
             $table->integer('current_stock')->default(0);
             $table->decimal('total_value', 14, 2)->default(0); // current_stock × cost_price
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             $table->unique(['product_id', 'warehouse_id']);

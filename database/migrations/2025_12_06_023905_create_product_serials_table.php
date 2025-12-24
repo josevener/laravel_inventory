@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('serial_no')->nullable();
             $table->unique(['client_id' , 'serial_no']);
             $table->boolean('is_available')->default(true);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             $table->index('client_id');

@@ -36,10 +36,11 @@ return new class extends Migration
             // $table->engine('InnoDB');
             $table->bigIncrements('id'); // role id
             if ($teams || config('permission.testing')) { // permission.testing is a fix for sqlite testing
+            $teamForeignKey = $columnNames['team_foreign_key'] ?? 'client_id';
                 $table->unsignedBigInteger($columnNames['team_foreign_key'])->nullable();
                 $table->index($columnNames['team_foreign_key'], 'roles_team_foreign_key_index');
             }
-            $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
+            $table->foreign($teamForeignKey)->references('id')->on('clients')->onDelete('cascade');
             $table->string('name');       // For MyISAM use string('name', 225); // (or 166 for InnoDB with Redundant/Compact row format)
             $table->string('guard_name'); // For MyISAM use string('guard_name', 25);
             $table->timestamps();

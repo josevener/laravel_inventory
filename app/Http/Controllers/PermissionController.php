@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Permission;
 use Inertia\Inertia;
 
@@ -30,10 +32,17 @@ class PermissionController extends Controller
 
     public function store($client, Request $request)
     {
+        $clientId = Auth::user()->client_id;
+
         app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
         $validated = $request->validate([
-            'name' => 'required|string|unique:permissions,name',
+            'name' => [
+            'required',
+            'string',
+            Rule::unique('permissions')
+                ->where(fn ($q) => $q->where('client_id', $clientId)),
+            ],
             'group' => 'nullable|string|max:255',
         ]);
 
@@ -54,9 +63,17 @@ class PermissionController extends Controller
     public function update(Request $request, $client, Permission $permission)
     {
         app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
-
+        
+        $clientId = Auth::user()->client_id;
+        
         $validated = $request->validate([
-            'name' => "required|string|unique:permissions,name,{$permission->id}",
+            'name' => [
+            'required',
+            'string',
+            Rule::unique('permissions')
+                ->where(fn ($q) => $q->where('client_id', $clientId))
+                ->ignore($permission->id),
+            ],
             'group' => "nullable|string|max:255"
         ]);
 

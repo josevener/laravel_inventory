@@ -42,10 +42,13 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user() ? [
                     'id' => $request->user()->id,
-                    'name' => $request->user()->name,
+                    'first_name' => $request->user()->first_name,
+                    'middle_name' => $request->user()->middle_name,
+                    'last_name' => $request->user()->last_name,
                     'email' => $request->user()->email,
-                    'roles' => $request->user()->getRoleNames(),
-                    'permissions' => $request->user()->getAllPermissions()->pluck('name'),
+                    // Lazy-load roles and permissions AFTER team middleware runs
+                    'roles' => fn () => $request->user()->getRoleNames(),
+                    'permissions' => fn () => $request->user()->getAllPermissions()->pluck('name')->toArray(),
                     'client' => $request->user()->client ? [
                         'id' => $request->user()->client->id,
                         'name' => $request->user()->client->name,

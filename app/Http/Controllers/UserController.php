@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Role;
@@ -21,7 +22,7 @@ class UserController extends Controller
 
         $query = User::with(['client', 'roles'])
             ->withCount('roles')
-            ->orderBy('name');
+            ->orderBy('last_name');
 
         // If the client is NOT superadmin, restrict by client_id
         if (!$authClient->is_superadmin) {
@@ -30,7 +31,9 @@ class UserController extends Controller
 
         $users = $query->get()->map(fn($user) => [
             'id' => $user->id,
-            'name' => $user->name,
+            'first_name' => $user->first_name,
+            'middle_name' => $user->middle_name,
+            'last_name' => $user->last_name,
             'email' => $user->email,
             'client' => $user->client?->name,
             'roles' => $user->roles->pluck('name'),
@@ -58,22 +61,63 @@ class UserController extends Controller
     public function store($client, Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8',
             'client_id' => 'sometimes|exists:clients,id',
             'roles' => 'required|array',
             'roles.*' => 'exists:roles,id',
         ]);
 
+        $clientId = $validated['client_id'] ?? Auth::user()->client_id;
+
         $user = User::create([
-            'name' => $validated['name'],
+            'first_name' => $validated['first_name'],
+            'middle_name' => $validated['middle_name'],
+            'last_name' => $validated['last_name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'client_id' => $validated['client_id'] ?? Auth::user()->client_id,
+            'client_id' => $clientId,
         ]);
 
-        $user->syncRoles($validated['roles']);
+        /**
+         * If client_id is provided,
+         * ensure roles exist for that client and assign them.
+         */
+        if (isset($validated['client_id'])) {
+
+            $tenantRoles = [];
+
+            foreach ($validated['roles'] as $roleId) {
+
+                $role = Role::findOrFail($roleId);
+
+                $tenantRole = Role::where('name', $role->name)
+                    ->where('client_id', $clientId)
+                    ->first();
+
+                if (!$tenantRole) {
+                    $tenantRole = Role::create([
+                        'client_id' => $clientId,
+                        'name' => $role->name,
+                        'guard_name' => 'web',
+                    ]);
+
+                    Log::info("Created tenant role: " . $tenantRole->name . " for client_id: " . $clientId);
+                    $tenantRole->syncPermissions($role->permissions);
+                    Log::info("Synced permissions to tenant role: " . $tenantRole->name);
+                }
+
+                $tenantRoles[] = $tenantRole;
+            }
+
+            $user->syncRoles($tenantRoles);
+        } else {
+            // default existing behavior (root/global roles)
+            $user->syncRoles($validated['roles']);
+        }
 
         return redirect()->route('users.index', ['client' => $client])
             ->with('success', "User '{$user->name}' created successfully.");
@@ -89,7 +133,9 @@ class UserController extends Controller
         return Inertia::render('Users/UserForm', [
             'user' => [
                 'id' => $user->id,
-                'name' => $user->name,
+                'first_name' => $user->first_name,
+                'middle_name' => $user->middle_name,
+                'last_name' => $user->last_name,
                 'email' => $user->email,
                 'client_id' => $user->client_id,
                 'client_name' => $user->client?->name,
@@ -103,7 +149,9 @@ class UserController extends Controller
     public function update(Request $request, $client, User $user)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
             'client_id' => 'required|exists:clients,id',
@@ -112,7 +160,9 @@ class UserController extends Controller
         ]);
 
         $user->update([
-            'name' => $validated['name'],
+            'first_name' => $validated['first_name'],
+            'middle_name' => $validated['middle_name'],
+            'last_name' => $validated['last_name'],
             'email' => $validated['email'],
             'password' => $validated['password'] ? Hash::make($validated['password']) : $user->password,
             'client_id' => $validated['client_id'],

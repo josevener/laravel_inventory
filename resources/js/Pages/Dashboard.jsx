@@ -20,8 +20,8 @@ import { useSafeRoute } from "@/hooks/useSafeRoute"
 
 export default function Dashboard({ 
   stats, 
-  recentInward, 
-  recentOutward, 
+  recentDispatch, 
+  recentPullout, 
   stockData,
   clientName 
 }) {
@@ -50,12 +50,12 @@ export default function Dashboard({
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Button asChild>
-                  <Link href={safeRoute("gatepass.inward.create")}>
-                    <Truck className="mr-2 h-4 w-4" /> New Inward
+                  <Link href={safeRoute("gatepass.dispatch.create")}>
+                    <Truck className="mr-2 h-4 w-4" /> New Dispatch
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link href={safeRoute("pull_out.create")}>
+                  <Link href={safeRoute("gatepass.pullout.create")}>
                     <Truck className="mr-2 h-4 w-4" /> New Pull Out
                   </Link>
                 </Button>
@@ -120,10 +120,10 @@ export default function Dashboard({
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {stats.inward_today + stats.outward_today}
+                {stats.dispatch_today + stats.pullout_today}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                {stats.inward_today} in • {stats.outward_today} out
+                {stats.dispatch_today} in • {stats.pullout_today} out
               </p>
             </CardContent>
           </Card>
@@ -133,7 +133,7 @@ export default function Dashboard({
         <Card className="col-span-full">
           <CardHeader>
             <CardTitle>Stock Movement (Last 7 Days)</CardTitle>
-            <CardDescription>Inward vs Outward quantities</CardDescription>
+            <CardDescription>Dispatch vs Pull Out quantities</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -142,25 +142,25 @@ export default function Dashboard({
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="inward" stroke="#10b981" name="Inward" strokeWidth={3} />
-                <Line type="monotone" dataKey="outward" stroke="#ef4444" name="Outward" strokeWidth={3} />
+                <Line type="monotone" dataKey="dispatch" stroke="#10b981" name="Dispatch" strokeWidth={3} />
+                <Line type="monotone" dataKey="pullout" stroke="#ef4444" name="Pull Out" strokeWidth={3} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         <div className="grid gap-8 md:grid-cols-2">
-          {/* Recent Inward */}
+          {/* Recent Dispatch */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ArrowDownCircle className="h-5 w-5 text-green-600" />
-                Recent Inward Gate Passes
+                Recent Dispatch Gate Passes
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {recentInward.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No recent inward</p>
+              {recentDispatch.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No recent dispatch</p>
               ) : (
                 <Table>
                   <TableHeader>
@@ -172,7 +172,7 @@ export default function Dashboard({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {recentInward.map((gp) => (
+                    {recentDispatch.map((gp) => (
                       <TableRow key={gp.id}>
                         <TableCell className="font-mono font-bold">{gp.gate_pass_no}</TableCell>
                         <TableCell>{gp.project.name}</TableCell>
@@ -186,7 +186,7 @@ export default function Dashboard({
             </CardContent>
           </Card>
 
-          {/* Recent Outward */}
+          {/* Recent Pull Out */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -195,7 +195,7 @@ export default function Dashboard({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {recentOutward.length === 0 ? (
+              {recentPullout.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">No recent pull outs</p>
               ) : (
                 <Table>
@@ -208,7 +208,7 @@ export default function Dashboard({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {recentOutward.map((po) => (
+                    {recentPullout.map((po) => (
                       <TableRow key={po.id}>
                         <TableCell className="font-mono font-bold">{po.gate_pass_no}</TableCell>
                         <TableCell>{po.project.name}</TableCell>

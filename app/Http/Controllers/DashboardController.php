@@ -3,11 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
-use App\Models\InwardGatePass;
-use App\Models\InwardGatePassItem;
+use App\Models\GatePass;
 use App\Models\Product;
-use App\Models\PullOut;
-use App\Models\PullOutItem;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -34,22 +31,26 @@ class DashboardController extends Controller
             'out_of_stock_products' => Product::when(!$isSuperAdmin, fn($q) => $q->where('client_id', $client->id))
                 ->where('current_stock', 0)
                 ->count(),
-            'inward_today' => InwardGatePass::whereDate('created_at', today())
+            'dispatch_today' => GatePass::whereDate('created_at', today())
+                ->where('type', 'dispatch')
                 ->when(!$isSuperAdmin, fn($q) => $q->where('client_id', $client->id))
                 ->count(),
-            'outward_today' => PullOut::whereDate('created_at', today())
+            'pullout_today' => GatePass::whereDate('created_at', today())
+                ->where('type', 'pullout')
                 ->when(!$isSuperAdmin, fn($q) => $q->where('client_id', $client->id))
                 ->count(),
         ];
 
         // Recent Activity
-        $recentInward = InwardGatePass::with(['project', 'createdBy'])
+        $recentDispatch = GatePass::where('type', 'dispatch')
+            ->with(['project', 'createdBy'])
             ->when(!$isSuperAdmin, fn($q) => $q->where('client_id', $client->id))
             ->latest()
             ->take(5)
             ->get();
 
-        $recentOutward = PullOut::with(['project', 'createdBy'])
+        $recentPullout = GatePass::where('type', 'pullout')
+            ->with(['project', 'createdBy'])
             ->when(!$isSuperAdmin, fn($q) => $q->where('client_id', $client->id))
             ->latest()
             ->take(5)
@@ -63,21 +64,23 @@ class DashboardController extends Controller
 
             $stockData[] = [
                 'date' => $label,
-                'inward' => InwardGatePassItem::join('inward_gate_passes', 'inward_gate_pass_items.inward_gate_pass_id', '=', 'inward_gate_passes.id')
-                    ->whereDate('inward_gate_passes.created_at', $date)
-                    ->when(!$isSuperAdmin, fn($q) => $q->where('inward_gate_passes.client_id', $client->id))
+                'dispatch' => GatePass::where('type', 'dispatch')
+                    ->join('gate_pass_items', 'gate_passes.id', '=', 'gate_pass_items.gate_pass_id')
+                    ->whereDate('gate_passes.created_at', $date)
+                    ->when(!$isSuperAdmin, fn($q) => $q->where('gate_passes.client_id', $client->id))
                     ->sum('quantity'),
-                'outward' => PullOutItem::join('pull_outs', 'pull_out_items.pull_out_id', '=', 'pull_outs.id')
-                    ->whereDate('pull_outs.created_at', $date)
-                    ->when(!$isSuperAdmin, fn($q) => $q->where('pull_outs.client_id', $client->id))
+                'pullout' => GatePass::where('type', 'pullout')
+                    ->join('gate_pass_items', 'gate_passes.id', '=', 'gate_pass_items.gate_pass_id')
+                    ->whereDate('gate_passes.created_at', $date)
+                    ->when(!$isSuperAdmin, fn($q) => $q->where('gate_passes.client_id', $client->id))
                     ->sum('quantity'),
             ];
         }
 
         return Inertia::render('Dashboard', [
             'stats' => $stats,
-            'recentInward' => $recentInward,
-            'recentOutward' => $recentOutward,
+            'recentDispatch' => $recentDispatch,
+            'recentPullout' => $recentPullout,
             'stockData' => $stockData,
             'isSuperAdmin' => $isSuperAdmin,
             'clientName' => $client->name,

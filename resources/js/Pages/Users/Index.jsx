@@ -22,7 +22,9 @@ export default function Index({ users: initialUsers }) {
 
   console.log(isSuperAdmin)
   const filteredUsers = initialUsers.filter(user =>
-    user.name.toLowerCase().includes(search.toLowerCase()) ||
+    user.first_name.toLowerCase().includes(search.toLowerCase()) ||
+    user.middle_name.toLowerCase().includes(search.toLowerCase()) ||
+    user.last_name.toLowerCase().includes(search.toLowerCase()) ||
     user.email.toLowerCase().includes(search.toLowerCase()) ||
     user.client?.toLowerCase().includes(search.toLowerCase()) ||
     user.role_list?.toLowerCase().includes(search.toLowerCase())
@@ -95,7 +97,7 @@ export default function Index({ users: initialUsers }) {
               <TableBody>
                 {filteredUsers.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.name}</TableCell>
+                    <TableCell className="font-medium">{user.first_name} {user.middle_name} {user.last_name}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     {isSuperAdmin && (
                       <TableCell>

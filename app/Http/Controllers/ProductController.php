@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -22,6 +23,33 @@ class ProductController extends Controller
         return Inertia::render('Products/Index', [
             'products' => $products
         ]);
+    }
+
+    public function list(Request $request)
+    {
+        $query = Product::query()
+            ->select('id', 'sku', 'name', 'current_stock', 'reorder_level', 'unit_id', 'category_id')
+            ->with([
+                'unit:id,name,short_name', 
+                'category:id,code,name',
+                'serials'
+            ])
+            ->where('client_id', Auth::user()->client_id)
+            ->orderBy('sku');
+
+        // Apply search if provided
+        if ($request->has('q') && $request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('sku', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%");
+            });
+        }
+
+        // Paginate: 20 per page (you can adjust)
+        $products = $query->paginate(20);
+
+        return response()->json($products);
     }
 
     public function create()
@@ -39,8 +67,16 @@ class ProductController extends Controller
 
     public function store($client, Request $request)
     {
+        $clientId = Auth::user()->client_id;
+
         $validated = $request->validate([
-            'sku' => 'required|string|max:50|unique:products,sku',
+            'sku' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('products')
+                    ->where(fn($q) => $q->where('client_id', $clientId)),
+            ],
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'unit_id' => 'required|exists:units,id',
@@ -71,7 +107,7 @@ class ProductController extends Controller
     public function edit($client, Product $product)
     {
         $product->load(['category', 'unit']);
-      
+
         return Inertia::render('Products/Edit', [
             'product' => $product,
             'categories' => Category::where('client_id', Auth::user()->client_id)
@@ -86,8 +122,17 @@ class ProductController extends Controller
 
     public function update(Request $request, $client, Product $product)
     {
+        $clientId = Auth::user()->client_id;
+
         $validated = $request->validate([
-            'sku' => 'required|string|max:50|unique:products,sku,' . $product->id,
+            'sku' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('products')
+                    ->where(fn($q) => $q->where('client_id', $clientId))
+                    ->ignore($product->id),
+            ],
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'unit_id' => 'required|exists:units,id',

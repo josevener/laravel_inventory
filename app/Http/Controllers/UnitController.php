@@ -12,8 +12,13 @@ class UnitController extends Controller
 {
     public function index()
     {
+        $clientId = Auth::user()->client_id;
+
         $units = Unit::with('products')
-            ->where('client_id', Auth::user()->client_id)
+            ->where('client_id', $clientId)
+            // ->whereHas('products', function ($query) use ($clientId) {
+            //     $query->where('client_id', $clientId);
+            // })
             ->orderBy('name')
             ->get();
 
