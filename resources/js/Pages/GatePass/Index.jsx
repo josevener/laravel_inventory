@@ -196,7 +196,7 @@ export default function GatepassIndex({ gatePasses, filters, projects, type }) {
                               variant="ghost"
                               onClick={() => {
                                 const link = document.createElement('a')
-                                link.href = safeRoute(`gatepass.${type}.print_gatepass`, { gatepass: gp.id })
+                                link.href = safeRoute(`gatepass.print_gatepass`, { gatepass: gp.id })
                                 link.target = "_blank"
                                 link.rel = "noopener noreferrer"
                                 document.body.appendChild(link)

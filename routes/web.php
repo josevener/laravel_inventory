@@ -37,6 +37,7 @@ Route::prefix('{client}')->middleware(['auth', 'verify.client'])->group(function
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/products/search', [ProductController::class, 'search'])->name('products.search');
+    Route::get('/products/list', [ProductController::class, 'list'])->name('products.list');
     Route::resource('/products', ProductController::class);
 
     Route::prefix('gatepass')->group(function () {
@@ -73,12 +74,16 @@ Route::prefix('{client}')->middleware(['auth', 'verify.client'])->group(function
 });
 
 Route::prefix('{client}')->middleware(['verify.client'])->group(function () {
-    Route::get('/gatepass/dispatch/{gatepass}/print_gatepass', [GatePassController::class, 'print_gatepass'])->name('gatepass.print_gatepass');
-    Route::get('/gatepass/pullout/{gatepass}/print_gatepass', [GatePassController::class, 'print_gatepass'])->name('gatepass.print_gatepass');
-    Route::get('/gatepass/dispatch/print-payslip', [GatePassController::class, 'printPayslipMonthly'])->name('gatepass.printPayslipMonthly');
-    Route::get('/gatepass/pullout/print-payslip', [GatePassController::class, 'printPayslipMonthly'])->name('gatepass.printPayslipMonthly');
+    Route::prefix('gatepass')->group(function () {
+        Route::prefix('dispatch')->group(function () {
+            Route::get('/{gatepass}/print_gatepass', [GatePassController::class, 'print_gatepass'])->name('gatepass.print_gatepass');
+        });
+        
+        Route::prefix('pullout')->group(function () {
+            Route::get('/{gatepass}/print_gatepass', [GatePassController::class, 'print_gatepass'])->name('gatepass.print_gatepass');
+        });
+    });
 });
-Route::get('/products/list', [ProductController::class, 'list'])->name('products.list');
 
 // Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
 
