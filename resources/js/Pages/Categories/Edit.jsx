@@ -1,14 +1,13 @@
 // Edit.jsx
 import { useForm } from "@inertiajs/react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
-import { ArrowLeft } from "lucide-react"
 import { Link } from "@inertiajs/react"
 import { Card, CardContent } from "@/components/ui/card"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
+import { Button } from "@/Components/ui/button"
 
 export default function Edit({ category }) {
   const { data, setData, put, processing, errors } = useForm({
