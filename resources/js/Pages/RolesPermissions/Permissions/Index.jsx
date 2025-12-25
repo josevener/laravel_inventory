@@ -1,12 +1,12 @@
 import { Head, Link, router } from "@inertiajs/react"
 import { Plus, Shield, Trash2, Edit, Folder, FolderOpen } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/Components/ui/button"
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from "@/components/ui/accordion"
+} from "@/Components/ui/accordion"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
 

@@ -1,14 +1,14 @@
 import React, { useState } from "react"
 import { Head, Link, router } from "@inertiajs/react"
 import { Plus, Scale, Edit, Trash2, FolderOpen } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import DeleteConfirmDialog from "@/components/custom/DeleteConfirmDialog"
+import { Button } from "@/Components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card"
+import { Badge } from "@/Components/ui/badge"
+import DeleteConfirmDialog from "@/Components/custom/DeleteConfirmDialog"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
 import { toast } from "sonner"
-import { EmptyState } from "@/components/custom/EmptyState"
+import { EmptyState } from "@/Components/custom/EmptyState"
 
 export default function UnitsIndex({ units }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)

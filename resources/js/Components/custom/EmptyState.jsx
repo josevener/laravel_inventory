@@ -1,6 +1,6 @@
 // resources/js/components/EmptyState.jsx
 import { ArrowUpRight, FolderIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -8,7 +8,7 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
+} from "@/Components/ui/empty";
 
 export function EmptyState({
   icon: Icon = FolderIcon,

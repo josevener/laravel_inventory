@@ -3,15 +3,15 @@ import { Head, Link, router } from "@inertiajs/react"
 import { format } from "date-fns"
 import { Truck, Search, Filter, Printer, Plus, FolderOpen } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "@/Components/ui/button"
+import { Input } from "@/Components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select"
+import { Badge } from "@/Components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/Components/ui/table"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
-import { EmptyState } from "@/components/custom/EmptyState"
+import { EmptyState } from "@/Components/custom/EmptyState"
 
 export default function GatepassIndex({ gatePasses, filters, projects, type }) {
   const statusColors = {

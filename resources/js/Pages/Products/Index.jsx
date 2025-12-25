@@ -8,15 +8,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import DeleteConfirmDialog from "@/components/custom/DeleteConfirmDialog"
+} from "@/Components/ui/table"
+import { Badge } from "@/Components/ui/badge"
+import { Button } from "@/Components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card"
+import { Input } from "@/Components/ui/input"
+import DeleteConfirmDialog from "@/Components/custom/DeleteConfirmDialog"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
-import { EmptyState } from "@/components/custom/EmptyState"
+import { EmptyState } from "@/Components/custom/EmptyState"
 
 export default function ProductsIndex({ products: initialProducts }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)

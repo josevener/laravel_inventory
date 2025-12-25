@@ -16,15 +16,15 @@ import {
   ChartBarStacked,
 } from "lucide-react"
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/Components/nav-main"
+import { NavUser } from "@/Components/nav-user"
 import { 
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/Components/ui/sidebar"
 
 const CompanyHeader = ({ company_name }) => (
   <div className="flex items-center gap-3 px-4 py-6">

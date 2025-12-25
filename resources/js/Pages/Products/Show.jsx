@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Head, Link, router } from "@inertiajs/react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Button } from "@/Components/ui/button";
+import { Input } from "@/Components/ui/input";
 import { Trash2, ArrowLeft, Plus } from "lucide-react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import ConfirmDialog from "@/components/custom/ConfirmDialog";
+import ConfirmDialog from "@/Components/custom/ConfirmDialog";
 import { useSafeRoute } from "@/hooks/useSafeRoute";
 
 export default function ProductShow({ product }) {

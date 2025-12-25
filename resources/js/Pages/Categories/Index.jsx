@@ -1,13 +1,13 @@
 import React, { useState } from "react"
 import { Head, Link, router } from "@inertiajs/react"
 import { Plus, FolderOpen, Edit, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/Components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card"
+import { Badge } from "@/Components/ui/badge"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
-import DeleteConfirmDialog from "@/components/custom/DeleteConfirmDialog"
+import DeleteConfirmDialog from "@/Components/custom/DeleteConfirmDialog"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
-import { EmptyState } from "@/components/custom/EmptyState"
+import { EmptyState } from "@/Components/custom/EmptyState"
 
 export default function CategoriesIndex({ categories }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)

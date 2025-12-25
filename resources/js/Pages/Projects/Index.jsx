@@ -1,13 +1,13 @@
 import React, { useState } from "react"
 import { Head, Link, router } from "@inertiajs/react"
 import { Plus, Building2, Phone, Mail, MapPin, BadgeCheck, Edit, Trash2, FolderOpen } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/Components/ui/button"
+import { Card, CardContent, CardHeader } from "@/Components/ui/card"
+import { Badge } from "@/Components/ui/badge"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
-import DeleteConfirmDialog from "@/components/custom/DeleteConfirmDialog"
+import DeleteConfirmDialog from "@/Components/custom/DeleteConfirmDialog"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
-import { EmptyState } from "@/components/custom/EmptyState"
+import { EmptyState } from "@/Components/custom/EmptyState"
 
 export default function Index({ projects }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)

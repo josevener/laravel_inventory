@@ -4,8 +4,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from "@/Components/ui/dialog";
+import { Button } from "@/Components/ui/button";
 
 export default function ConfirmDialog({ isOpen, onClose, onConfirm, title, description, confirmText = "Confirm" }) {
   return (

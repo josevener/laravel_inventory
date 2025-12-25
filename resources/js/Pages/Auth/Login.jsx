@@ -1,4 +1,4 @@
-import { LoginForm } from '@/components/LoginForm';
+import { LoginForm } from '@/Components/LoginForm';
 import { Head, useForm } from '@inertiajs/react';
 import { GalleryVerticalEnd } from "lucide-react";
 
