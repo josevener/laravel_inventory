@@ -1,6 +1,6 @@
+import { LoginForm } from '@/Components/login-form';
 import { Head, useForm } from '@inertiajs/react';
 import { GalleryVerticalEnd } from "lucide-react";
-import { LoginForm } from "@/components/login-form";
 
 export default function Login({ status, canResetPassword }) {
   const { data, setData, post, processing, errors, reset } = useForm({
