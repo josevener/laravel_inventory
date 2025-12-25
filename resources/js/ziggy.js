@@ -1,5 +1,5 @@
 const Ziggy = {
-    url: "http://localhost",
+    url: process.env.APP_URL,
     port: null,
     defaults: {},
     routes: {

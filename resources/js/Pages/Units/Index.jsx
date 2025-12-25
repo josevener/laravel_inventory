@@ -8,7 +8,7 @@ import DeleteConfirmDialog from "@/components/custom/DeleteConfirmDialog"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
 import { toast } from "sonner"
-import { EmptyState } from "@/Components/custom/EmptyState"
+import { EmptyState } from "@/components/custom/EmptyState"
 
 export default function UnitsIndex({ units }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)

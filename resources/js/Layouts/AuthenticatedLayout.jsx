@@ -1,8 +1,8 @@
-import { AppSidebar } from "@/Components/AppSidebar";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/Components/ui/breadcrumb";
-import { Separator } from "@/Components/ui/separator";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/Components/ui/sidebar";
-import { Toaster } from "@/Components/ui/toaster";
+import { AppSidebar } from "@/components/AppSidebar";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/toaster";
 import { useFlashToast } from "@/hooks/useFlashToast";
 
 export default function AuthenticatedLayout({ 

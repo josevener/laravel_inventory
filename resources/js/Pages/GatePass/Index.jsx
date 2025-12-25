@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
-import { EmptyState } from "@/Components/custom/EmptyState"
+import { EmptyState } from "@/components/custom/EmptyState"
 
 export default function GatepassIndex({ gatePasses, filters, projects, type }) {
   const statusColors = {

@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
-import DeleteConfirmDialog from "@/Components/custom/DeleteConfirmDialog"
+import DeleteConfirmDialog from "@/components/custom/DeleteConfirmDialog"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
-import { EmptyState } from "@/Components/custom/EmptyState"
+import { EmptyState } from "@/components/custom/EmptyState"
 
 export default function Index({ projects }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)

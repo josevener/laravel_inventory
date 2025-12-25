@@ -7,7 +7,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { Link } from "@inertiajs/react"
 import { Card, CardContent } from "@/components/ui/card"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
-import { Button } from "@/Components/ui/button"
+import { Button } from "@/components/ui/button"
 
 export default function Edit({ category }) {
   const { data, setData, put, processing, errors } = useForm({

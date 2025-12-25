@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
-import { ArrowLeft } from "lucide-react"
 import { Link } from "@inertiajs/react"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
 
