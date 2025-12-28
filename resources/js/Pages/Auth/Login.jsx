@@ -50,7 +50,7 @@ export default function Login({ status, canResetPassword }) {
         {/* Right side - Image */}
         <div className="relative hidden bg-muted lg:block">
           <img
-            src="/storage/assets/login/background.png"
+            src="/storage/background.png"
             alt="Login background"
             className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
           />
