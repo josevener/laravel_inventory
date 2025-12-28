@@ -76,11 +76,11 @@ Route::prefix('{client}')->middleware(['auth', 'verify.client'])->group(function
 Route::prefix('{client}')->middleware(['verify.client'])->group(function () {
     Route::prefix('gatepass')->group(function () {
         Route::prefix('dispatch')->group(function () {
-            Route::get('/{gatepass}/print_gatepass', [GatePassController::class, 'print_gatepass'])->name('gatepass.print_gatepass');
+            Route::get('/{gatepass}/print_gatepass', [GatePassController::class, 'print_gatepass'])->name('gatepass.dispatch.print_gatepass');
         });
         
         Route::prefix('pullout')->group(function () {
-            Route::get('/{gatepass}/print_gatepass', [GatePassController::class, 'print_gatepass'])->name('gatepass.print_gatepass');
+            Route::get('/{gatepass}/print_gatepass', [GatePassController::class, 'print_gatepass'])->name('gatepass.pullout.print_gatepass');
         });
     });
 });

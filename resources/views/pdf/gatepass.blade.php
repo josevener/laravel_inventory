@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SSI Metal Corp - Gate Pass {{ $gatePass->gate_pass_no }}</title>
+    <title>{{ $company['name'] ?? "SSI Metal Corp." }} — Gate Pass {{ $gatePass->gate_pass_no }}</title>
     <style>
         @page {
             margin: 0px;
@@ -12,7 +12,7 @@
         body {
             font-family: Arial, Helvetica, sans-serif;
             font-size: 9pt;
-            margin: 30px 40px;
+            margin: 10px 20px;
         }
 
         .bold { font-weight: bold; }
@@ -238,7 +238,7 @@
         </div>
 
         <div class="header-center">
-            <div class="company-name">{{ $company['name'] ?? "SSI Metal Corp."}}</div>
+            <div class="company-name">{{ $company['name'] ?? "SSI Metal Corp." }}</div>
             <div class="location-name">Quezon City</div>
             <div class="doc-title">GATE PASS</div>
         </div>
@@ -286,7 +286,10 @@
                     <td style="font-weight: bold;">*{{ $item->quantity }} {{ $item->product->unit->short_name ?? 'Pc' }}</td>
                     <td style="font-weight: bold;">*{{ $item->product->name }} {{ $item->product->sku }}</td>
                     <td>
-                        @if ($loop->remaining === 1 && $gatePass->project)
+                        @if (
+                            $gatePass->project && 
+                            (($loop->count === 1 && $loop->last) || $loop->remaining === 1)
+                        )
                             <div class="intended-for-text">
                                 *For {{ $gatePass->project->company_name }} Project<br>
                                 <small>{{ $gatePass->project->project_started ?? "C-" . $gatePass->project->created_at->format('Y-m-d') }}</small>

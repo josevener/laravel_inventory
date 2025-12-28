@@ -9,6 +9,7 @@ use App\Models\GatePassItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -84,6 +85,8 @@ class GatePassController extends Controller
             ->count();
 
         $nextNumber = 30000 + $todayCount;
+
+        Log::info('Next Number: '. $nextNumber .' todayCount'. $todayCount );
 
         $projects = Project::when(
             !$authClient->is_superadmin,
@@ -165,8 +168,10 @@ class GatePassController extends Controller
     /**
      * Print gate pass PDF
      */
-    public function print_gatepass($client, GatePass $gatepass)
+    public function print_gatepass($client, Request $request, GatePass $gatepass)
     {
+        $type = $this->detectType($request);
+
         $gatepass->load(['project', 'client', 'items.product.unit', 'createdBy']);
 
         $company = [
@@ -176,7 +181,7 @@ class GatePassController extends Controller
 
         $qrCode = base64_encode(
             QrCode::format('svg')->size(140)->errorCorrection('H')
-                ->generate(route('gatepass.print_gatepass', ['gatepass' => $gatepass->id, 'client' => $client]))
+                ->generate(route("gatepass.{$type}.print_gatepass", ['gatepass' => $gatepass->id, 'client' => $client]))
         );
 
         $pdf = Pdf::loadView('pdf.gatepass', [
@@ -191,6 +196,6 @@ class GatePassController extends Controller
             'isHtml5ParserEnabled' => true,
         ]);
 
-        return $pdf->stream("DGP-{$gatepass->gate_pass_no}.pdf");
+        return $pdf->stream("DGP-{$gatepass->created_at}-{$gatepass->gate_pass_no}.pdf");
     }
 }

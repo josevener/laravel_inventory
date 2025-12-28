@@ -14,7 +14,12 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('client_id')->constrained('clients')->restrictOnDelete();
             $table->foreignId('project_id')->constrained('projects')->restrictOnDelete();
-            $table->string('gate_pass_no')->unique();
+
+            $table->string('gate_pass_no');
+
+            $table->unique(['client_id', 'created_date', 'gate_pass_no']);
+            
+            $table->unique(['created_at','gate_pass_no']);
             $table->string('authorized_bearer');
             $table->enum('type', ['dispatch', 'pullout']);
             $table->text('remarks')->nullable();
@@ -24,6 +29,8 @@ return new class extends Migration {
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            // Date extracted from created_at for uniqueness rule
+            $table->date('created_date')->storedAs('DATE(created_at)');
 
             // Indexes
             $table->index('client_id');

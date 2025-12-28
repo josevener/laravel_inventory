@@ -1,27 +1,49 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/Components/ui/dialog";
 import { Button } from "@/Components/ui/button";
 
-export default function ConfirmDialog({ isOpen, onClose, onConfirm, title, description, confirmText = "Confirm" }) {
+export default function ConfirmDialog({
+  open,
+  onOpenChange,
+  title = "Are you sure?",
+  description = "This action cannot be undone.",
+  confirmText = "Delete",
+  cancelText = "Cancel",
+  onConfirm,
+  variant = "destructive", // for the confirm button
+  isLoading = false,
+}) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isLoading}
+          >
+            {cancelText}
           </Button>
-          <Button onClick={onConfirm}>
-            {confirmText}
+          <Button
+            type="button"
+            variant={variant}
+            onClick={onConfirm}
+            disabled={isLoading}
+            loading={isLoading}
+          >
+            {isLoading ? "Deleting..." : confirmText}
           </Button>
         </DialogFooter>
       </DialogContent>

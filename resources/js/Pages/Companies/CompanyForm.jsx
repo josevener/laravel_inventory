@@ -70,7 +70,7 @@ export default function CompanyForm({ client = null }) {
                   <Input
                     value={data.name}
                     onChange={(e) => setData("name", e.target.value)}
-                    placeholder="SSI Metal Corp."
+                    placeholder="ABC Corp."
                   />
                   {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
                 </div>
