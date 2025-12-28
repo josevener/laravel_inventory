@@ -40,13 +40,12 @@ export function AppSidebar({ ...props }) {
   const { auth, url } = usePage().props
   const userPermissions = auth?.user?.permissions || []
 
-  const hasPermission = (perm) => !perm || userPermissions.includes(perm)
-
-  const clientCode = auth?.user?.client?.code;
-  const isSuperAdmin = auth?.user?.client?.is_superadmin ? true : false;
+  const clientCode = auth?.user?.client?.code
+  const isSuperAdmin = auth?.user?.client?.is_superadmin || false
   const hasViewCompanies = userPermissions.includes("View Companies")
 
-  const navMain = [
+  // Define groups and items
+  const navGroups = [
     {
       group: "Productivity",
       items: [
@@ -61,18 +60,10 @@ export function AppSidebar({ ...props }) {
         { title: "Pull Out", url: "gatepass/pullout", icon: ArrowUpRight, badge: "IN", permission: "View Pull Out Gatepass" },
         { title: "Projects", url: "projects", icon: Boxes, permission: "View Projects" },
         { title: "Users", url: "users", icon: UserCheck, permission: "View Users" },
-        // Show Companies if superadmin OR has permission
         ...(isSuperAdmin && hasViewCompanies
-          ? [{
-              title: "Companies",
-              url: "companies",
-              icon: Users,
-              permission: "View Companies"
-            }]
+          ? [{ title: "Companies", url: "companies", icon: Users, permission: "View Companies" }]
           : []),
-        { title: "Roles & Permissions", url: "roles-permissions", icon: Shield, permission: "View Reports" },
-        // { title: "Stock Transfer", url: "/transfer", icon: ArrowLeftRight, permission: "manage stock transfer" },
-        // { title: "Stock Adjustment", url: "/adjustment", icon: AlertCircle, permission: "adjust stock" },
+        { title: "Roles & Permissions", url: "roles-permissions", icon: Shield, permission: "View Roles" },
       ],
     },
     {
@@ -82,34 +73,31 @@ export function AppSidebar({ ...props }) {
         { title: "Units", url: "units", icon: Combine, permission: "View Units" },
       ],
     },
-    // { title: "Roles", url: "roles-permissions/roles", icon: FileText, permission: "view reports" },
-    // { title: "Permissions", url: "roles-permissions/permissions", icon: Shield, permission: "view reports" },
     {
       group: "Reports",
       items: [
         { title: "Reports", url: "reports", icon: FileText, permission: "View Reports" },
       ]
     }
-  ].map((item) => {
-    if (item.items) {
-      return {
-        ...item,
-        items: item.items.map((sub) => ({
-          ...sub,
-          url: `/${clientCode}/${sub.url}`,
-        })),
-      };
-    }
+  ]
 
-    return {
-      ...item,
-      url: `/${clientCode}/${item.url}`,
-    };
-  }).filter(item => {
-    if (item.permission) return hasPermission(item.permission)
-    if (item.items) return item.items.some(sub => hasPermission(sub.permission))
-    return true
-  })
+  // Filter items by user permissions and prepend client code
+  const navMain = navGroups
+    .map(group => {
+      const filteredItems = group.items
+        .filter(item => userPermissions.includes(item.permission))
+        .map(item => ({
+          ...item,
+          url: `/${clientCode}/${item.url}`,
+        }))
+
+      if (filteredItems.length === 0) return null // skip empty groups
+      return {
+        ...group,
+        items: filteredItems,
+      }
+    })
+    .filter(Boolean) // remove nulls
 
   return (
     <Sidebar collapsible="icon" {...props}>

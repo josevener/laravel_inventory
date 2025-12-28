@@ -22,8 +22,9 @@ class UsersImport implements ToModel, WithHeadingRow
         $user = User::updateOrCreate(
             ['email' => $row['email']],
             [
-                'name' => $row['name'],
-                'password' => Hash::make($row['password'] ?? 'password123'),
+                'first_name' => $row['first_name'],
+                'last_name' => $row['last_name'],
+                'password' => Hash::make($row['password'] ?? '12345678'),
                 'client_id' => $client->id,
             ]
         );

@@ -48,7 +48,7 @@ export default function UserForm({ user = null, clients, roles }) {
     email: user?.email || "",
     password: "", // Will be auto-filled on create
     client_id: user?.client_id || auth?.user?.client_id,
-    roles: user?.roles?.map(r => r.id) || [],
+    roles: user?.roles || [],
   })
 
   // Generate password only on create (not edit)
@@ -217,7 +217,7 @@ export default function UserForm({ user = null, clients, roles }) {
                     type="password"
                     value={data.password}
                     onChange={(e) => setData("password", e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="Password"
                   />
                   {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
                 </div>
@@ -255,7 +255,8 @@ export default function UserForm({ user = null, clients, roles }) {
                         onChange={(e) => {
                           if (e.target.checked) {
                             setData("roles", [...data.roles, role.id])
-                          } else {
+                          } 
+                          else {
                             setData("roles", data.roles.filter((id) => id !== role.id))
                           }
                         }}

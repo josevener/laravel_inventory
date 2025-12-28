@@ -11,16 +11,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/ui/dialog"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
+import useHasPermission from "@/hooks/useHasPermission"
 
 export default function Index({ users: initialUsers }) {
   const [search, setSearch] = useState("")
   const [openImport, setOpenImport] = useState(false)
   const safeRoute = useSafeRoute()
-  const { auth } = usePage().props
+  const { auth, csrf_token } = usePage().props
+  const hasPermission = useHasPermission()
 
   const isSuperAdmin = auth?.user?.client?.is_superadmin ? true : false
 
-  console.log(isSuperAdmin)
   const filteredUsers = initialUsers.filter(user =>
     user.first_name.toLowerCase().includes(search.toLowerCase()) ||
     user.middle_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -30,6 +31,12 @@ export default function Index({ users: initialUsers }) {
     user.role_list?.toLowerCase().includes(search.toLowerCase())
   )
 
+  const submit = (e) => {
+    e.preventDefault()
+    const formData = new FormData(e.target)
+    router.post(safeRoute("users.import"), formData)
+  }
+  
   return (
     <AuthenticatedLayout>
       <Head title="Users" />
@@ -57,16 +64,20 @@ export default function Index({ users: initialUsers }) {
             </div>
 
             {/* Export Button */}
-            <Button variant="outline" onClick={() => window.location.href = safeRoute("users.export")}>
-              <Download className="mr-2 h-4 w-4" />
-              Export Excel
-            </Button>
+            {hasPermission("Export User") && (
+              <Button variant="outline" onClick={() => window.location.href = safeRoute("users.export")}>
+                <Download className="mr-2 h-4 w-4" />
+                Export Excel
+              </Button>
+            )}
 
             {/* Import Button */}
-            <Button variant="outline" onClick={() => setOpenImport(true)}>
-              <Upload className="mr-2 h-4 w-4" />
-              Import Excel
-            </Button>
+            {hasPermission("Import User") && (
+              <Button variant="outline" onClick={() => setOpenImport(true)}>
+                <Upload className="mr-2 h-4 w-4" />
+                Import Excel
+              </Button>
+            )}
 
             <Button asChild>
               <Link href={safeRoute("users.create")}>
@@ -157,6 +168,7 @@ export default function Index({ users: initialUsers }) {
             <DialogTitle>Import Users from Excel</DialogTitle>
           </DialogHeader>
           <form action={safeRoute("users.import")} method="POST" encType="multipart/form-data">
+            <input type="hidden" name="_token" value={csrf_token} />
             <input type="file" name="file" accept=".xlsx,.xls" required className="mb-4" />
             <div className="flex justify-end gap-3">
               <Button type="button" variant="outline" onClick={() => setOpenImport(false)}>

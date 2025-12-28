@@ -153,9 +153,9 @@ class UserController extends Controller
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8|confirmed',
+            'password' => 'nullable|string|min:8',
             'client_id' => 'required|exists:clients,id',
-            'roles' => 'required|array',
+            'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,id',
         ]);
 
@@ -171,7 +171,7 @@ class UserController extends Controller
         $user->syncRoles($validated['roles']);
 
         return redirect()->route('users.index', ['client' => $client])
-            ->with('success', "User '{$user->name}' updated.");
+            ->with('success', "'{$user->first_name} {$user->last_name}'s information has been updated successfully.");
     }
 
     public function destroy($client, User $user)

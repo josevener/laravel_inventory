@@ -46,6 +46,13 @@ class RolePermissionSeeder extends Seeder
                     'Delete Company',
                 ],
 
+                'Roles' => [
+                    'View Roles',
+                    'Create Roles',
+                    'Edit Roles',
+                    'Delete Roles',
+                ],
+
                 'Categories' => [
                     'View Categories',
                     'Create Category',
@@ -67,16 +74,16 @@ class RolePermissionSeeder extends Seeder
                     'Delete Unit',
                 ],
 
-                'Inward Gatepass' => [
-                    'View Inward Gatepass',
-                    'Create Inward Gatepass',
-                    'Generate Inward Gatepass',
+                'Dispatch Gatepass' => [
+                    'View Dispatch Gatepass',
+                    'Create Dispatch Gatepass',
+                    'Generate Dispatch Gatepass',
                 ],
 
-                'Outward Gatepass' => [
-                    'View Outward Gatepass',
-                    'Create Outward Gatepass',
-                    'Generate Outward Gatepass',
+                'Pull Out Gatepass' => [
+                    'View Pull Out Gatepass',
+                    'Create Pull Out Gatepass',
+                    'Generate Pull Out Gatepass',
                 ],
 
                 'Users' => [
@@ -128,32 +135,32 @@ class RolePermissionSeeder extends Seeder
 
             'Admin' => [
                 'View Dashboard',
-                'View Inward Gatepass',
-                'View Outward Gatepass',
+                'View Dispatch Gatepass',
+                'View Pull Out Gatepass',
                 'View Products',
                 'View Reports',
 
-                'Create Inward Gatepass',
-                'Create Outward Gatepass',
-                'Generate Inward Gatepass',
-                'Generate Outward Gatepass',
+                'Create Dispatch Gatepass',
+                'Create Pull Out Gatepass',
+                'Generate Dispatch Gatepass',
+                'Generate Pull Out Gatepass',
             ],
 
             'Manager' => [
                 'View Dashboard',
                 'View Products',
-                'Create Inward Gatepass',
-                'Create Outward Gatepass',
+                'Create Dispatch Gatepass',
+                'Create Pull Out Gatepass',
                 'View Reports',
             ],
 
             'Warehouse Staff' => [
-                'View Inward Gatepass',
-                'Create Inward Gatepass',
-                'Generate Inward Gatepass',
-                'View Outward Gatepass',
-                'Create Outward Gatepass',
-                'Generate Outward Gatepass',
+                'View Dispatch Gatepass',
+                'Create Dispatch Gatepass',
+                'Generate Dispatch Gatepass',
+                'View Pull Out Gatepass',
+                'Create Pull Out Gatepass',
+                'Generate Pull Out Gatepass',
             ],
 
             'Viewer' => [

@@ -127,7 +127,9 @@ class ClientController extends Controller
                 foreach ($validated['new_roles'] as $roleData) {
                     // If roles are global (not per client), use Role::create()
                     // If roles are per client, use $client->roles()->create()
-                    $client->roles()->create($roleData);
+                    $role = $client->roles()->create($roleData);
+
+                    $role->syncPermissions($validated['permissions']);
                 }
             }
         });
@@ -222,7 +224,9 @@ class ClientController extends Controller
                     foreach ($validated['new_roles'] as $roleData) {
                         // Example: global roles or per-client
                         // Role::create($roleData);
-                        $company->roles()->create($roleData);
+                        $role = $company->roles()->create($roleData);
+
+                        $role->syncPermissions($validated['permissions']);
                     }
                 }
             });
