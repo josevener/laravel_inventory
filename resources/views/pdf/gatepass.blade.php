@@ -284,7 +284,7 @@
             @forelse($gatePass->items as $index => $item)
                 <tr>
                     <td style="font-weight: bold;">*{{ $item->quantity }} {{ $item->product->unit->short_name ?? 'Pc' }}</td>
-                    <td style="font-weight: bold;">*{{ $item->product->name }} {{ $item->product->sku }}</td>
+                    <td style="font-weight: bold;">*{{ $item->product->category->name }} {{ $item->product->name }} {{ $item->product->sku }}</td>
                     <td>
                         @if (
                             $gatePass->project && 
