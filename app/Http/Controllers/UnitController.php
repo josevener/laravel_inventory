@@ -40,6 +40,7 @@ class UnitController extends Controller
                 'string',
                 'max:50',
                 Rule::unique('units', 'name')
+                    ->whereNull('deleted_at')
                     ->where('client_id', Auth::user()->client_id),
             ],
             'short_name' => [
@@ -47,12 +48,13 @@ class UnitController extends Controller
                 'string',
                 'max:10',
                 Rule::unique('units', 'short_name')
+                    ->whereNull('deleted_at')
                     ->where('client_id', Auth::user()->client_id),
             ],
         ]);
 
         $validated['client_id'] = Auth::user()->client_id;
-        
+
         Unit::create($validated);
 
         return redirect()->route('units.index', ['client' => $client])
@@ -66,17 +68,43 @@ class UnitController extends Controller
         ]);
     }
 
+
     public function update(Request $request, $client, Unit $unit)
     {
+        $clientId = Auth::user()->client_id;
+
         $validated = $request->validate([
-            'name' => 'required|string|max:50|unique:units,name,' . $unit->id,
-            'short_name' => 'required|string|max:10|unique:units,short_name,' . $unit->id,
+            'name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('units', 'name')
+                    ->ignore($unit->id)
+                    ->where(
+                        fn($q) =>
+                        $q->whereNull('deleted_at')
+                            ->where('client_id', $clientId)
+                    ),
+            ],
+            'short_name' => [
+                'required',
+                'string',
+                'max:10',
+                Rule::unique('units', 'short_name')
+                    ->ignore($unit->id)
+                    ->where(
+                        fn($q) =>
+                        $q->whereNull('deleted_at')
+                            ->where('client_id', $clientId)
+                    ),
+            ],
         ]);
 
         $unit->update($validated);
 
-        return redirect()->route('units.index', ['client' => $client])
-            ->with('success', 'Unit updated.');
+        return redirect()
+            ->route('units.index', ['client' => $client])
+            ->with('success', 'Unit updated successfully.');
     }
 
     public function destroy($client, Unit $unit)
