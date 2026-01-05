@@ -5,11 +5,11 @@ import { Label } from "@/Components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
-import { UserPlus, Copy, Check } from "lucide-react"
+import { UserPlus, Copy, Check, Eye, EyeOff } from "lucide-react"
 import { Link } from "@inertiajs/react"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
 import { useState, useEffect } from "react"
-import { toast } from "sonner" // Assuming you're using Sonner for toasts
+import { toast } from "sonner"
 
 // Simple strong password generator
 const generatePassword = () => {
@@ -40,6 +40,7 @@ export default function UserForm({ user = null, clients, roles }) {
 
   const [generatedPassword, setGeneratedPassword] = useState("")
   const [copied, setCopied] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const { data, setData, post, put, processing, errors, reset } = useForm({
     first_name: user?.first_name || "",
@@ -60,10 +61,15 @@ export default function UserForm({ user = null, clients, roles }) {
     }
   }, [isEdit, generatedPassword, setData])
 
+  // Reset password visibility when switching between create/edit
+  useEffect(() => {
+    setShowPassword(false)
+  }, [isEdit])
+
   const fullName = `${data.first_name} ${data.middle_name ? data.middle_name + " " : ""}${data.last_name}`.trim()
 
   const handleCopyCredentials = () => {
-    const text = `Full Name: ${fullName}\nEmail: ${data.email}\nPassword: ${generatedPassword}`
+    const text = `Full Name: ${fullName}\nEmail: ${data.email}\nPassword: ${generatedPassword || data.password}`
     
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true)
@@ -169,21 +175,40 @@ export default function UserForm({ user = null, clients, roles }) {
                 {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
               </div>
 
-              {/* Password - Create Mode */}
-              {!isEdit && (
-                <div>
-                  <Label>Generated Password</Label>
-                  <div className="flex gap-3">
-                    <Input
-                      type="text"
-                      value={generatedPassword}
-                      readOnly
-                      className="font-mono"
-                    />
+              {/* Unified Password Field */}
+              <div>
+                <Label>
+                  {isEdit ? "New Password" : "Password"}
+                  {isEdit && <span className="text-muted-foreground text-sm"> (leave blank to keep current)</span>}
+                </Label>
+
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    value={data.password}
+                    onChange={(e) => setData("password", e.target.value)}
+                    placeholder={isEdit ? "Enter new password (optional)" : "Auto-generated – you can edit or regenerate"}
+                    className="font-mono pr-24"
+                  />
+
+                  {/* Toggle Show/Hide Password */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-12 top-1/2 -translate-y-1/2 h-8 w-8"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+
+                  {/* Regenerate Button – Only on Create */}
+                  {!isEdit && (
                     <Button
                       type="button"
                       variant="outline"
                       size="icon"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
                       onClick={() => {
                         const newPass = generatePassword()
                         setGeneratedPassword(newPass)
@@ -193,35 +218,34 @@ export default function UserForm({ user = null, clients, roles }) {
                     >
                       <UserPlus className="h-4 w-4" />
                     </Button>
+                  )}
+                </div>
+
+                {/* Helper Text & Copy Button */}
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-sm text-muted-foreground">
+                    {!isEdit
+                      ? "A strong password was auto-generated. You can edit it directly or regenerate."
+                      : "Only fill this field if you want to change the user's password."}
+                  </p>
+
+                  {/* Copy Credentials – Only on Create */}
+                  {!isEdit && (
                     <Button
                       type="button"
                       variant="outline"
+                      size="sm"
                       onClick={handleCopyCredentials}
                       disabled={copied}
                     >
                       {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
                       {copied ? "Copied!" : "Copy Credentials"}
                     </Button>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    A strong password has been auto-generated. You can regenerate or copy it.
-                  </p>
+                  )}
                 </div>
-              )}
 
-              {/* Password - Edit Mode */}
-              {isEdit && (
-                <div>
-                  <Label>New Password (leave blank to keep current)</Label>
-                  <Input
-                    type="password"
-                    value={data.password}
-                    onChange={(e) => setData("password", e.target.value)}
-                    placeholder="Password"
-                  />
-                  {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
-                </div>
-              )}
+                {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
+              </div>
 
               {/* Client Select - Super Admin Only */}
               {isSuperAdmin && (
@@ -255,8 +279,7 @@ export default function UserForm({ user = null, clients, roles }) {
                         onChange={(e) => {
                           if (e.target.checked) {
                             setData("roles", [...data.roles, role.id])
-                          } 
-                          else {
+                          } else {
                             setData("roles", data.roles.filter((id) => id !== role.id))
                           }
                         }}
