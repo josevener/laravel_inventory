@@ -50,9 +50,9 @@ class GatePassController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('gate_pass_no', 'LIKE', "%{$search}%")
-                  ->orWhere('authorized_bearer', 'LIKE', "%{$search}%")
-                  ->orWhereHas('project', fn($q) => $q->where('company_name', 'LIKE', "%{$search}%")
-                                                      ->orWhere('name', 'LIKE', "%{$search}%"));
+                    ->orWhere('authorized_bearer', 'LIKE', "%{$search}%")
+                    ->orWhereHas('project', fn($q) => $q->where('company_name', 'LIKE', "%{$search}%")
+                        ->orWhere('name', 'LIKE', "%{$search}%"));
             });
         }
 
@@ -86,7 +86,7 @@ class GatePassController extends Controller
 
         $nextNumber = 30000 + $todayCount;
 
-        Log::info('Next Number: '. $nextNumber .' todayCount'. $todayCount );
+        Log::info('Next Number: ' . $nextNumber . ' todayCount' . $todayCount);
 
         $projects = Project::when(
             !$authClient->is_superadmin,
@@ -115,14 +115,50 @@ class GatePassController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
         ]);
 
+        /**
+         * DISPATCH validation (warehouse stock)
+         */
         if ($type === 'dispatch') {
             foreach ($validated['items'] as $item) {
                 $product = Product::find($item['product_id']);
+
                 if ($item['quantity'] > $product->current_stock) {
-                    return redirect()->back()
+                    return back()
                         ->withInput()
-                        ->with([
-                            'error' => "Cannot dispatch {$item['quantity']} of {$product->name}. Only {$product->current_stock} in stock."
+                        ->withErrors([
+                            'items' => "Cannot dispatch {$item['quantity']} of {$product->name}. Only {$product->current_stock} in stock."
+                        ]);
+                }
+            }
+        }
+
+        /**
+         * PULLOUT validation (project stock)
+         */
+        if ($type === 'pullout') {
+            foreach ($validated['items'] as $item) {
+
+                $available = GatePassItem::query()
+                    ->join('gate_passes', 'gate_pass_items.gate_pass_id', '=', 'gate_passes.id')
+                    ->where('gate_passes.project_id', $validated['project_id'])
+                    ->where('gate_passes.client_id', Auth::user()->client_id)
+                    ->where('gate_pass_items.product_id', $item['product_id'])
+                    ->selectRaw("
+                    SUM(
+                        CASE 
+                            WHEN gate_passes.type = 'dispatch' THEN quantity
+                            WHEN gate_passes.type = 'pullout' THEN -quantity
+                            ELSE 0
+                        END
+                    )
+                ")
+                    ->value('available');
+
+                if ($item['quantity'] > $available) {
+                    return back()
+                        ->withInput()
+                        ->withErrors([
+                            'items' => 'Pullout quantity exceeds dispatched quantity for this project.'
                         ]);
                 }
             }
@@ -151,6 +187,7 @@ class GatePassController extends Controller
                 ]);
 
                 $product = Product::find($item['product_id']);
+
                 if ($type === 'dispatch') {
                     $product->decrement('current_stock', $item['quantity']);
                 } 
@@ -189,13 +226,55 @@ class GatePassController extends Controller
             'company' => $company,
             'qrCode' => $qrCode,
         ])
-        ->setPaper('letter', 'portrait')
-        ->setOptions([
-            'defaultFont' => 'DejaVu Sans',
-            'isRemoteEnabled' => true,
-            'isHtml5ParserEnabled' => true,
-        ]);
+            ->setPaper('letter', 'portrait')
+            ->setOptions([
+                'defaultFont' => 'DejaVu Sans',
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+            ]);
 
         return $pdf->stream("DGP-{$gatepass->created_at}-{$gatepass->gate_pass_no}.pdf");
+    }
+
+    public function dispatchedItems(Project $project)
+    {
+        $clientId = Auth::user()->client_id;
+
+        // Tenant safety
+        abort_if($project->client_id !== $clientId, 403);
+
+        $items = GatePassItem::query()
+            ->select(
+                'product_id',
+                DB::raw("
+                SUM(
+                    CASE 
+                        WHEN gate_passes.type = 'dispatch' THEN quantity
+                        WHEN gate_passes.type = 'pullout' THEN -quantity
+                        ELSE 0
+                    END
+                ) as available_quantity
+            ")
+            )
+            ->join('gate_passes', 'gate_pass_items.gate_pass_id', '=', 'gate_passes.id')
+            ->where('gate_passes.client_id', $clientId)
+            ->where('gate_passes.project_id', $project->id)
+            ->where('gate_passes.status', 'completed')
+            ->groupBy('product_id')
+            ->having('available_quantity', '>', 0)
+            ->with([
+                'product:id,sku,name,current_stock,reorder_level,unit_id',
+                'product.unit:id,short_name',
+            ])
+            ->get()
+            ->map(fn($row) => [
+                'id' => $row->product->id,
+                'sku' => $row->product->sku,
+                'name' => $row->product->name,
+                'current_stock' => $row->available_quantity, // ← IMPORTANT
+                'unit_short' => $row->product->unit->short_name,
+            ]);
+
+        return response()->json($items);
     }
 }

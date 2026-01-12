@@ -137,11 +137,13 @@ export default function GatepassCreate({ type, projects, nextNumber }) {
           <Fence className="h-12 w-12 text-primary" />
           <div>
             <h1 className="text-3xl font-bold">
-              {type === 'dispatch' ? 'Dispatch' : 'Pull Out'} Gate Pass
+              {type === 'dispatch' ? 'Dispatch Gate Pass' : 'Pull Out'}
             </h1>
-            <p className="text-xl text-muted-foreground font-mono mt-1">
-              No: <span className="text-primary font-bold">{nextNumber}</span>
-            </p>
+            {type === 'dispatch' && (
+              <p className="text-xl text-muted-foreground font-mono mt-1">
+                No: <span className="text-primary font-bold">{nextNumber}</span>
+              </p>
+            )}
           </div>
         </div>
 

@@ -52,6 +52,9 @@ Route::prefix('{client}')->middleware(['auth', 'verify.client'])->group(function
             Route::get('/create', [GatePassController::class, 'create'])->name('gatepass.pullout.create');
             Route::post('/', [GatePassController::class, 'store'])->name('gatepass.pullout.store');
         });
+
+        Route::get('/projects/{project}/dispatched_items', [GatePassController::class, 'dispatchedItems'])
+            ->name('gatepass.project.dispatched_items');
     });
 
 
@@ -78,7 +81,7 @@ Route::prefix('{client}')->middleware(['verify.client'])->group(function () {
         Route::prefix('dispatch')->group(function () {
             Route::get('/{gatepass}/print_gatepass', [GatePassController::class, 'print_gatepass'])->name('gatepass.dispatch.print_gatepass');
         });
-        
+
         Route::prefix('pullout')->group(function () {
             Route::get('/{gatepass}/print_gatepass', [GatePassController::class, 'print_gatepass'])->name('gatepass.pullout.print_gatepass');
         });
