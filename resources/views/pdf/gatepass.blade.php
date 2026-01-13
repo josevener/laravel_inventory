@@ -12,7 +12,7 @@
         body {
             font-family: Arial, Helvetica, sans-serif;
             font-size: 9pt;
-            margin: 10px 20px;
+            margin: 10px 10px;
         }
 
         .bold { font-weight: bold; }
@@ -148,36 +148,33 @@
 
         .item-table th:last-child,
         .item-table td:last-child {
-            text-align: right;
+            text-align: left; /* changed from right to allow natural wrapping */
             width: 28%;
             padding-right: 10px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 0;
         }
 
-        .intended-for-text {
-            position: absolute;
-            font-weight: bold;
-            font-size: 9pt;
-            color: #000;
-            text-align: right;
-            line-height: 1.3;
-            pointer-events: none;
-        }
-
-        /* HASH LINE - MINIMAL TOP MARGIN ONLY */
+        /* HASH LINE */
         .hash-line {
             text-align: center;
             color: #555;
             font-size: 9pt;
-            margin: 8px 0 20px 0; /* Only 8px top, keeps it tight to table */
+            margin: 8px 0 20px 0;
             letter-spacing: -1px;
         }
 
-        /* FOOTER */
+        /* FOOTER - NOW FIXED AT BOTTOM */
         .footer-wrap {
-            width: 100%;
+            position: fixed;
+            bottom: 125mm;               /* adjust this value if footer is too high/low */
+            left: 12mm;
+            right: 12mm;
+            width: auto;
             border-top: 1px solid black;
             padding-top: 15px;
-            position: relative;
+            background: white;
         }
 
         .footer-note {
@@ -290,10 +287,8 @@
                             $gatePass->project && 
                             (($loop->count === 1 && $loop->last) || $loop->remaining === 1)
                         )
-                            <div class="intended-for-text">
-                                *For {{ $gatePass->project->company_name }} Project<br>
-                                <small>{{ $gatePass->project->project_started ?? "C-" . $gatePass->project->created_at->format('Y-m-d') }}</small>
-                            </div>
+                            <strong>*For {{ $gatePass->project->company_name }} Project</strong><br>
+                            <small style="color: #555;">{{ $gatePass->project->project_started ?? "C-" . $gatePass->project->created_at->format('Y-m-d') }}</small>
                         @endif
                     </td>
                 </tr>

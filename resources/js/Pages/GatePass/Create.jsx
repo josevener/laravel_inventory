@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { useForm, useFieldArray } from "react-hook-form"
+import { useForm, useFieldArray, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Head, router } from "@inertiajs/react"
@@ -31,7 +31,7 @@ export default function GatepassCreate({ type, projects, nextNumber }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [allProducts, setAllProducts] = useState([])
   const [filteredProducts, setFilteredProducts] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [selectedItems, setSelectedItems] = useState([])
 
   const safeRoute = useSafeRoute()
@@ -50,8 +50,26 @@ export default function GatepassCreate({ type, projects, nextNumber }) {
     name: "items",
   })
 
+  const projectId = useWatch({
+    control: form.control,
+    name: "project_id",
+  })
+
+  useEffect(() => {
+    if (type !== "pullout") return
+  
+    // Clear RHF items array
+    form.setValue("items", [])
+  
+    // Clear UI items
+    setSelectedItems([])
+  
+  }, [projectId])
+  
   // Fetch all products
   useEffect(() => {
+    if (type !== "dispatch") return
+
     const fetchProducts = async () => {
       setLoading(true)
       try {
@@ -68,7 +86,34 @@ export default function GatepassCreate({ type, projects, nextNumber }) {
     }
 
     fetchProducts()
-  }, [])
+  }, [type])
+
+  
+  useEffect(() => {
+    if (type !== "pullout") return
+    if (!form.watch("project_id")) return
+  
+    const projectId = form.watch("project_id")
+    
+    const loadProjectStock = async () => {
+      setLoading(true)
+      try {
+        const res = await axios.get(
+          safeRoute("gatepass.project.dispatched_items", { project: projectId })
+        )
+        setAllProducts(res.data)
+        setFilteredProducts(res.data)
+      } 
+      catch (e) {
+        console.error(e)
+      } 
+      finally {
+        setLoading(false)
+      }
+    }
+  
+    loadProjectStock()
+  }, [form.watch("project_id"), type])
 
   // Filter products based on search
   useEffect(() => {
@@ -125,8 +170,8 @@ export default function GatepassCreate({ type, projects, nextNumber }) {
   return (
     <AuthenticatedLayout
       breadCrumbLink={safeRoute(`gatepass.${type}.index`)}
-      breadCrumbLinkText={`${type === 'dispatch' ? 'Dispatch' : 'Pull Out'} Gate Passes`}
-      breadCrumbPage={`New ${type === 'dispatch' ? 'Dispatch' : 'Pull Out'} Gate Pass`}
+      breadCrumbLinkText={`${type === 'dispatch' ? 'Dispatch Gate Passes' : 'Pull Out'}`}
+      breadCrumbPage={`New ${type === 'dispatch' ? 'Dispatch Gate Pass' : 'Pull Out'}`}
     >
       <Head title={`${type === 'dispatch' ? 'Dispatch' : 'Pull Out'} Gate Passes`} />
 
@@ -295,6 +340,9 @@ export default function GatepassCreate({ type, projects, nextNumber }) {
                             <TableHead>SKU</TableHead>
                             <TableHead>Product</TableHead>
                             <TableHead>Current Stock</TableHead>
+                            {type === 'pullout' && (
+                              <TableHead className="text-center">Dispatched Qty</TableHead>
+                            )}
                             <TableHead className="text-center">
                               {type === 'dispatch' ? 'Dispatch Qty' : 'Receive Qty'}
                             </TableHead>
@@ -307,7 +355,7 @@ export default function GatepassCreate({ type, projects, nextNumber }) {
                             if (!item) return null
 
                             return (
-                              <TableRow key={field.id}>
+                              <TableRow key={field.id} className="text-center">
                                 <TableCell className="font-mono text-sm">{item.sku}</TableCell>
                                 <TableCell className="font-medium">{item.name}</TableCell>
                                 <TableCell>
@@ -315,6 +363,13 @@ export default function GatepassCreate({ type, projects, nextNumber }) {
                                     {item.current_stock} {item.unit_short}
                                   </Badge>
                                 </TableCell>
+                                {type === 'pullout' && (
+                                  <TableCell>
+                                    <Badge variant="outline">
+                                      {item.current_stock} {item.unit_short}
+                                    </Badge>
+                                  </TableCell>
+                                )}
                                 <TableCell>
                                   <Input
                                     type="number"

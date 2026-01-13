@@ -52,16 +52,14 @@ class GatePassController extends Controller
                 $q->where('gate_pass_no', 'LIKE', "%{$search}%")
                     ->orWhere('authorized_bearer', 'LIKE', "%{$search}%")
                     ->orWhereHas('project', fn($q) => $q->where('company_name', 'LIKE', "%{$search}%")
-                        ->orWhere('name', 'LIKE', "%{$search}%"));
+                    ->orWhere('name', 'LIKE', "%{$search}%"));
             });
         }
 
         $gatePasses = $query->paginate(15)->withQueryString();
 
-        $projects = Project::when(
-            !$authClient->is_superadmin,
-            fn($q) => $q->where('client_id', $authClient->id)
-        )->orderBy('company_name')->get(['id', 'company_name', 'name']);
+        $projects = Project::where('client_id', $authClient->id)
+            ->orderBy('company_name')->get(['id', 'company_name', 'name']);
 
         return Inertia::render('GatePass/Index', [
             'type' => $type,
@@ -81,17 +79,14 @@ class GatePassController extends Controller
         $today = now()->startOfDay();
 
         $todayCount = GatePass::where('client_id', $authClient->id)
+            ->where('type', 'dispatch' )
             ->whereDate('created_at', $today)
             ->count();
 
         $nextNumber = 30000 + $todayCount;
 
-        Log::info('Next Number: ' . $nextNumber . ' todayCount' . $todayCount);
-
-        $projects = Project::when(
-            !$authClient->is_superadmin,
-            fn($q) => $q->where('client_id', $authClient->id)
-        )->orderBy('company_name')->get(['id', 'name', 'company_name']);
+        $projects = Project::where('client_id', $authClient->id)
+            ->orderBy('company_name')->get(['id', 'name', 'company_name']);
 
         return Inertia::render('GatePass/Create', [
             'type' => $type,
@@ -144,16 +139,18 @@ class GatePassController extends Controller
                     ->where('gate_passes.client_id', Auth::user()->client_id)
                     ->where('gate_pass_items.product_id', $item['product_id'])
                     ->selectRaw("
-                    SUM(
-                        CASE 
-                            WHEN gate_passes.type = 'dispatch' THEN quantity
-                            WHEN gate_passes.type = 'pullout' THEN -quantity
-                            ELSE 0
-                        END
-                    )
-                ")
+                        SUM(
+                            CASE 
+                                WHEN gate_passes.type = 'dispatch' THEN quantity
+                                WHEN gate_passes.type = 'pullout' THEN -quantity
+                                ELSE 0
+                            END
+                        )
+                    ")
                     ->value('available');
 
+                Log::info($available);
+                
                 if ($item['quantity'] > $available) {
                     return back()
                         ->withInput()
@@ -167,7 +164,7 @@ class GatePassController extends Controller
         DB::transaction(function () use ($validated, $request, $type) {
             // Create Gate Pass
             $gatePass = GatePass::create([
-                'gate_pass_no' => $request->nextNumber,
+                'gate_pass_no' => $type === "dispatch" ? $request->nextNumber : null,
                 'project_id' => $validated['project_id'],
                 'authorized_bearer' => $validated['authorized_bearer'],
                 'type' => $type,
@@ -236,7 +233,7 @@ class GatePassController extends Controller
         return $pdf->stream("DGP-{$gatepass->created_at}-{$gatepass->gate_pass_no}.pdf");
     }
 
-    public function dispatchedItems(Project $project)
+    public function dispatchedItems($client, Project $project)
     {
         $clientId = Auth::user()->client_id;
 
@@ -271,7 +268,8 @@ class GatePassController extends Controller
                 'id' => $row->product->id,
                 'sku' => $row->product->sku,
                 'name' => $row->product->name,
-                'current_stock' => $row->available_quantity, // ← IMPORTANT
+                'current_stock' => $row->available_quantity,
+                'dispatched_qty' => $row->available_quantity,
                 'unit_short' => $row->product->unit->short_name,
             ]);
 

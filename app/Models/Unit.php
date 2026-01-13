@@ -21,20 +21,6 @@ class Unit extends Model
         'short_name' => 'string',
     ];
 
-    // Auto uppercase short name
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($unit) {
-            $unit->short_name = strtoupper($unit->short_name);
-        });
-
-        static::updating(function ($unit) {
-            $unit->short_name = strtoupper($unit->short_name);
-        });
-    }
-
     public function client()
     {
         return $this->belongsTo(Client::class);
