@@ -132,7 +132,7 @@ class GatePassController extends Controller
          */
         if ($type === 'pullout') {
             foreach ($validated['items'] as $item) {
-
+                Log::info($item);
                 $available = GatePassItem::query()
                     ->join('gate_passes', 'gate_pass_items.gate_pass_id', '=', 'gate_passes.id')
                     ->where('gate_passes.project_id', $validated['project_id'])

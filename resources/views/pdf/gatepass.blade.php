@@ -114,6 +114,7 @@
             display: inline-block;
             font-weight: bold;
             text-align: center;
+            font-size: 11pt;
         }
 
         /* ITEMS TABLE - REDUCED BOTTOM MARGIN */
@@ -149,7 +150,7 @@
         .item-table th:last-child,
         .item-table td:last-child {
             text-align: left; /* changed from right to allow natural wrapping */
-            width: 28%;
+            width: 45%;
             padding-right: 10px;
             word-wrap: break-word;
             overflow-wrap: break-word;
@@ -168,7 +169,7 @@
         /* FOOTER - NOW FIXED AT BOTTOM */
         .footer-wrap {
             position: fixed;
-            bottom: 125mm;               /* adjust this value if footer is too high/low */
+            bottom: 120mm;               /* adjust this value if footer is too high/low */
             left: 12mm;
             right: 12mm;
             width: auto;
@@ -287,8 +288,10 @@
                             $gatePass->project && 
                             (($loop->count === 1 && $loop->last) || $loop->remaining === 1)
                         )
-                            <strong>*For {{ $gatePass->project->company_name }} Project</strong><br>
-                            <small style="color: #555;">{{ $gatePass->project->project_started ?? "C-" . $gatePass->project->created_at->format('Y-m-d') }}</small>
+                            <div style="position: absolute; font-weight: bold; font-size: 9pt;">
+                                <div>*For {{ $gatePass->project->company_name }} Project</div>
+                                <div>{{ $gatePass->project->project_started ?? "C-" . $gatePass->project->created_at->format('Y-m-d')}}</div>
+                            </div>
                         @endif
                     </td>
                 </tr>
