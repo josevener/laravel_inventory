@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->foreignId('client_id')->constrained('clients')->restrictOnDelete();
             $table->foreignId('project_id')->constrained('projects')->restrictOnDelete();
 
-            $table->string('gate_pass_no')->nullable();
+            $table->string('gate_pass_no');
 
             $table->unique(['client_id', 'created_date', 'gate_pass_no']);
             

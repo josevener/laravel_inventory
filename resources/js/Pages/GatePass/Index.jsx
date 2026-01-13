@@ -21,6 +21,7 @@ export default function GatepassIndex({ gatePasses, filters, projects, type }) {
     completed: "bg-blue-100 text-blue-800",
   }
   const safeRoute = useSafeRoute()
+  const isDispatch = type === 'dispatch' ? true : false;
 
   // Simple Pagination Component
   const Pagination = ({ links }) => {
@@ -44,7 +45,7 @@ export default function GatepassIndex({ gatePasses, filters, projects, type }) {
 
   return (
     <AuthenticatedLayout>
-      <Head title={`${type === 'dispatch' ? 'Dispatch' : 'Pull Out'} Gate Passes`} />
+      <Head title={`${type === 'dispatch' ? 'Dispatch Gate Passes' : 'Pull Out'}`} />
 
       <div className="space-y-6">
         {/* Header */}
@@ -53,14 +54,14 @@ export default function GatepassIndex({ gatePasses, filters, projects, type }) {
             <Truck className="h-10 w-10 text-primary" />
             <div>
               <h1 className="text-3xl font-bold">
-                {type === 'dispatch' ? 'Dispatch' : 'Pull Out'} Gate Passes</h1>
+                {type === 'dispatch' ? 'Dispatch Gate Passes' : 'Pull Out'}</h1>
               <p className="text-muted-foreground">Manage outgoing stock {type === 'dispatch' ? 'dispatches' : 'pull-outs'}</p>
             </div>
           </div>
           <Button asChild>
             <Link href={safeRoute(`gatepass.${type}.create`)}>
               <Plus className="mr-2 h-4 w-4" />
-              New {type === 'dispatch' ? 'Dispatch' : 'Pull Out'} Gate Pass
+              New {type === 'dispatch' ? 'Dispatch Gate Pass' : 'Pull Out'}
             </Link>
           </Button>
         </div>
@@ -162,21 +163,27 @@ export default function GatepassIndex({ gatePasses, filters, projects, type }) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Gate Pass No</TableHead>
+                      {isDispatch && (
+                        <TableHead>Gate Pass No</TableHead>
+                      )}
                       <TableHead>Date</TableHead>
                       <TableHead>Project</TableHead>
                       <TableHead>Autorized Bearer</TableHead>
                       <TableHead>Items</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      {isDispatch && (
+                        <TableHead className="text-right">Actions</TableHead>
+                      )}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {gatePasses.data.map((gp) => (
                         <TableRow key={gp.id}>
-                          <TableCell className="font-mono font-bold text-primary">
-                            {gp.gate_pass_no}
-                          </TableCell>
+                          {type === 'dispatch' && (
+                            <TableCell className="font-mono font-bold text-primary">
+                              {gp.gate_pass_no}
+                            </TableCell>
+                          )}
                           <TableCell>{format(new Date(gp.created_at), "dd MMM yyyy, hh:mm a")}</TableCell>
                           <TableCell>
                             {gp.project.company_name || gp.project.name}
@@ -190,23 +197,25 @@ export default function GatepassIndex({ gatePasses, filters, projects, type }) {
                               {gp.status.charAt(0).toUpperCase() + gp.status.slice(1)}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                const link = document.createElement('a')
-                                link.href = safeRoute(`gatepass.${type}.print_gatepass`, { gatepass: gp.id })
-                                link.target = "_blank"
-                                link.rel = "noopener noreferrer"
-                                document.body.appendChild(link)
-                                link.click()
-                                document.body.removeChild(link)
-                              }}
-                            >
-                              <Printer className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
+                          {isDispatch && (
+                            <TableCell className="text-right">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  const link = document.createElement('a')
+                                  link.href = safeRoute(`gatepass.${type}.print_gatepass`, { gatepass: gp.id })
+                                  link.target = "_blank"
+                                  link.rel = "noopener noreferrer"
+                                  document.body.appendChild(link)
+                                  link.click()
+                                  document.body.removeChild(link)
+                                }}
+                              >
+                                <Printer className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          )}
                         </TableRow>
                       ))
                     }

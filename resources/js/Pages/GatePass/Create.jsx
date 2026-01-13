@@ -160,8 +160,11 @@ export default function GatepassCreate({ type, projects, nextNumber }) {
       nextNumber,
     }, {
       onSuccess: () => {
-        form.reset()
-        setSelectedItems([])
+        // Only reset if backend did NOT send an error
+        if (!page.props.flash?.error) {
+          form.reset()
+          setSelectedItems([])
+        }
       },
       preserveScroll: true,
     })

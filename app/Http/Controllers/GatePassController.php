@@ -120,8 +120,8 @@ class GatePassController extends Controller
                 if ($item['quantity'] > $product->current_stock) {
                     return back()
                         ->withInput()
-                        ->withErrors([
-                            'items' => "Cannot dispatch {$item['quantity']} of {$product->name}. Only {$product->current_stock} in stock."
+                        ->with([
+                            'error' => "Cannot dispatch {$item['quantity']} of {$product->name}. Only {$product->current_stock} in stock."
                         ]);
                 }
             }
@@ -132,31 +132,33 @@ class GatePassController extends Controller
          */
         if ($type === 'pullout') {
             foreach ($validated['items'] as $item) {
-                Log::info($item);
+                $product = Product::find($item['product_id']);
+
                 $available = GatePassItem::query()
                     ->join('gate_passes', 'gate_pass_items.gate_pass_id', '=', 'gate_passes.id')
                     ->where('gate_passes.project_id', $validated['project_id'])
                     ->where('gate_passes.client_id', Auth::user()->client_id)
+                    ->where('gate_passes.status', 'completed')
                     ->where('gate_pass_items.product_id', $item['product_id'])
                     ->selectRaw("
-                        SUM(
-                            CASE 
-                                WHEN gate_passes.type = 'dispatch' THEN quantity
-                                WHEN gate_passes.type = 'pullout' THEN -quantity
-                                ELSE 0
-                            END
-                        )
+                        COALESCE(
+                            SUM(
+                                CASE 
+                                    WHEN gate_passes.type = 'dispatch' THEN gate_pass_items.quantity
+                                    WHEN gate_passes.type = 'pullout' THEN -gate_pass_items.quantity
+                                    ELSE 0
+                                END
+                            ), 0
+                        ) AS available
                     ")
                     ->value('available');
 
-                Log::info($available);
-                
+
                 if ($item['quantity'] > $available) {
                     return back()
                         ->withInput()
-                        ->withErrors([
-                            'items' => 'Pullout quantity exceeds dispatched quantity for this project.'
-                        ]);
+                        ->with('error', "Pull-out quantity for {$product->name} exceeds the dispatched amount. Available: {$available}.");
+                        // ->with('error', "You cannot pull out {$item['quantity']} of {$product->name}. Only {$product->current_stock} is currently dispatched for this project.");
                 }
             }
         }
