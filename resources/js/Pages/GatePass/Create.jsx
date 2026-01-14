@@ -342,7 +342,9 @@ export default function GatepassCreate({ type, projects, nextNumber }) {
                           <TableRow>
                             <TableHead>SKU</TableHead>
                             <TableHead>Product</TableHead>
-                            <TableHead>Current Stock</TableHead>
+                            {type === 'dispatch' && (
+                              <TableHead>Current Stock</TableHead>
+                            )}
                             {type === 'pullout' && (
                               <TableHead className="text-center">Dispatched Qty</TableHead>
                             )}
@@ -361,11 +363,13 @@ export default function GatepassCreate({ type, projects, nextNumber }) {
                               <TableRow key={field.id} className="text-center">
                                 <TableCell className="font-mono text-sm">{item.sku}</TableCell>
                                 <TableCell className="font-medium">{item.name}</TableCell>
-                                <TableCell>
-                                  <Badge variant="outline">
-                                    {item.current_stock} {item.unit_short}
-                                  </Badge>
-                                </TableCell>
+                                {type === 'dispatch' && (
+                                  <TableCell>
+                                    <Badge variant="outline">
+                                      {item.current_stock} {item.unit_short}
+                                    </Badge>
+                                  </TableCell>
+                                )}
                                 {type === 'pullout' && (
                                   <TableCell>
                                     <Badge variant="outline">

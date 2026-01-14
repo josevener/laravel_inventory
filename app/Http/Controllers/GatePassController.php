@@ -215,9 +215,17 @@ class GatePassController extends Controller
             'address' => $gatepass->client->address ?? 'Quezon City',
         ];
 
-        $qrCode = base64_encode(
-            QrCode::format('svg')->size(140)->errorCorrection('H')
-                ->generate(route("gatepass.{$type}.print_gatepass", ['gatepass' => $gatepass->id, 'client' => $client]))
+        // $qrCode = base64_encode(
+        //     QrCode::format('svg')->size(140)->errorCorrection('H')
+        //         ->generate(route("gatepass.{$type}.print_gatepass", ['gatepass' => $gatepass->id, 'client' => $client]))
+        // );
+         $qrCode = base64_encode(
+    QrCode::format('svg')
+                ->size(140)
+                ->errorCorrection('H')
+                ->generate(
+                    route('gatepass.verify', [$client, 'gatepass' => $gatepass->id])
+                )
         );
 
         $pdf = Pdf::loadView('pdf.gatepass', [
@@ -233,6 +241,38 @@ class GatePassController extends Controller
             ]);
 
         return $pdf->stream("DGP-{$gatepass->created_at}-{$gatepass->gate_pass_no}.pdf");
+    }
+
+    public function printPullOut($client, GatePass $gatepass)
+    {
+        abort_if($gatepass->type !== 'pullout', 404);
+
+        $gatepass->load([
+            'project',
+            'client',
+            'items.product.unit',
+        ]);
+
+        $company = [
+            'name' => $gatepass->client->name ?? config('app.name'),
+        ];
+
+        $qrCode = base64_encode(
+    QrCode::format('svg')
+                ->size(140)
+                ->errorCorrection('H')
+                ->generate(
+                    route('gatepass.verify', [$client, 'gatepass' => $gatepass->id])
+                )
+        );
+
+        return Pdf::loadView('pdf.pullout', [
+            'gatePass' => $gatepass,
+            'company'  => $company,
+            'qrCode'   => $qrCode,
+        ])
+        ->setPaper('letter')
+        ->stream("PULL-OUT-{$gatepass->id}.pdf");
     }
 
     public function dispatchedItems($client, Project $project)
@@ -276,5 +316,19 @@ class GatePassController extends Controller
             ]);
 
         return response()->json($items);
+    }
+
+    public function verify($client, GatePass $gatepass)
+    {
+        $gatepass->load([
+            'project',
+            'client',
+            'items.product.unit',
+            'createdBy',
+        ]);
+
+        return Inertia::render('GatePass/Verify', [
+            'gatePass' => $gatepass,
+        ]);
     }
 }

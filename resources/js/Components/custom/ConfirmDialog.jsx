@@ -43,7 +43,7 @@ export default function ConfirmDialog({
             disabled={isLoading}
             loading={isLoading}
           >
-            {isLoading ? "Deleting..." : confirmText}
+            {isLoading ? "Processing..." : confirmText}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -11,9 +11,15 @@ import { useSafeRoute } from "@/hooks/useSafeRoute";
 export default function ProductShow({ product }) {
   const [serialInput, setSerialInput] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const safeRoute = useSafeRoute()
+  const [isLoading, setIsLoading] = useState(false);
+  const safeRoute = useSafeRoute();
+
+  const serialLimitReached =
+    product.serials.length >= product.current_stock;
   
   const addSerial = () => {
+    setIsLoading(true);
+
     router.post(
       safeRoute("product-serials.store"),
       {
@@ -21,9 +27,19 @@ export default function ProductShow({ product }) {
         serial_no: serialInput,
       },
       {
+        preserveScroll: true,
+
         onSuccess: () => {
           setSerialInput("");
           setConfirmOpen(false);
+        },
+        
+        onError: () => {
+          // do nothing
+        },
+
+        onFinish: () => {
+          setIsLoading(false);
         },
       }
     );
@@ -35,6 +51,7 @@ export default function ProductShow({ product }) {
 
   const openAddModal = () => {
     if (!serialInput.trim()) return;
+    if (serialLimitReached) return;
 
     setConfirmOpen(true);
   };
@@ -92,50 +109,83 @@ export default function ProductShow({ product }) {
           </CardHeader>
 
           <CardContent>
-            <div className="flex gap-2 mb-4">
+            {/* Add Serial */}
+            <div className="flex gap-2 mb-2">
               <Input
                 placeholder="Enter serial number"
                 value={serialInput}
                 onChange={(e) => setSerialInput(e.target.value)}
+                disabled={serialLimitReached}
               />
-              <Button onClick={openAddModal}>
+              <Button
+                onClick={openAddModal}
+                disabled={serialLimitReached}
+              >
                 <Plus className="h-4 w-4 mr-1" /> Add
               </Button>
             </div>
 
-            {product.serials.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No serial numbers yet.</p>
-            ) : (
-              <ul className="space-y-2">
-                {product.serials.map((s) => (
-                  <li
-                    key={s.id}
-                    className="flex justify-between items-center border p-2 rounded"
-                  >
-                    <span>{s.serial_no}</span>
-                    <Button
-                      size="icon"
-                      variant="destructive"
-                      onClick={() => deleteSerial(s.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </li>
-                ))}
-              </ul>
+            {serialLimitReached && (
+              <p className="text-xs text-red-600 mb-4">
+                Serial limit reached. You cannot add more serials than the current stock.
+              </p>
             )}
+
+            {/* Grid Header */}
+            <div className="grid grid-cols-4 gap-2 border-b p-4 text-sm font-semibold bg-gray-200 text-muted-foreground">
+              <div>#</div>
+              <div>Serial No.</div>
+              <div>Available</div>
+              <div className="text-right">Action</div>
+            </div>
+
+            {/* Scrollable Grid Body */}
+            <div className="max-h-64 overflow-y-auto mt-2 space-y-1">
+              {product.serials.length === 0 ? (
+                <p className="text-muted-foreground text-sm py-4">
+                  No serial numbers yet.
+                </p>
+              ) : (
+                product.serials.map((s, idx) => (
+                  <div
+                    key={s.id}
+                    className="grid grid-cols-4 gap-2 items-center border rounded px-2 py-2 text-sm"
+                  >
+                    <div>{++idx}</div>
+                    <div className="font-mono">{s.serial_no}</div>
+
+                    <div>
+                      <span className="text-green-600 font-medium text-center">
+                        Yes
+                      </span>
+                    </div>
+
+                    <div className="text-right">
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        onClick={() => deleteSerial(s.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Confirm Add Serial */}
       <ConfirmDialog
-        isOpen={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
         onConfirm={addSerial}
         title="Add Serial Number"
         description={`Are you sure you want to add serial number "${serialInput}"?`}
         confirmText="Add Serial"
+        isLoading={isLoading}
       />
     </AuthenticatedLayout>
   );
