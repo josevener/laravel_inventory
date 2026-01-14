@@ -2,41 +2,41 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
-class CategoryController extends Controller
+class BrandController extends Controller
 {
     public function index()
     {
-        $categories = Category::with('products')
+        $brands = Brand::with('products')
             ->where('client_id', Auth::user()->client_id)
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('Categories/Index', [
-            'categories' => $categories
+        return Inertia::render('Brands/Index', [
+            'brands' => $brands
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('Categories/Create');
+        return Inertia::render('Brands/Create');
     }
 
     public function store($client, Request $request)
     {
         $clientId = Auth::user()->client_id;
-        
+
         $validated = $request->validate([
             'code' => [
-                'required',
+                'nullable',
                 'string',
                 'max:20',
-                Rule::unique('categories')
+                Rule::unique('brands')
                     ->where(fn ($q) => $q
                         ->where('client_id', $clientId)
                         ->whereNull('deleted_at')
@@ -46,41 +46,43 @@ class CategoryController extends Controller
                 'required',
                 'string',
                 'max:100',
-                Rule::unique('categories')
+                Rule::unique('brands')
                     ->where(fn ($q) => $q
                         ->where('client_id', $clientId)
                         ->whereNull('deleted_at')
                     ),
             ],
+            'logo_path' => 'nullable|string|max:255',
+            'website' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:1000',
         ]);
 
         $validated['client_id'] = Auth::user()->client_id;
 
-        Category::create($validated);
+        Brand::create($validated);
 
-        return redirect()->route('categories.index', [ 'client' => $client])
-            ->with('success', 'Category created successfully.');
+        return redirect()->route('brands.index', [ 'client' => $client])
+            ->with('success', 'Brand created successfully.');
     }
 
-    public function edit($client, Category $category)
+    public function edit($client, Brand $brand)
     {
-        return Inertia::render('Categories/Edit', [
-            'category' => $category
+        return Inertia::render('Brands/Edit', [
+            'brand' => $brand
         ]);
     }
 
-    public function update(Request $request, $client, Category $category)
+    public function update(Request $request, $client, Brand $brand)
     {
         $clientId = Auth::user()->client_id;
 
         $validated = $request->validate([
             'code' => [
-                'required',
+                'nullable',
                 'string',
                 'max:20',
-                Rule::unique('categories')
-                    ->ignore($category->id)
+                Rule::unique('brands')
+                    ->ignore($brand->id)
                     ->where(fn ($q) => $q
                         ->where('client_id', $clientId)
                         ->whereNull('deleted_at')
@@ -90,8 +92,8 @@ class CategoryController extends Controller
                 'required',
                 'string',
                 'max:100',
-                Rule::unique('categories')
-                    ->ignore($category->id)
+                Rule::unique('brands')
+                    ->ignore($brand->id)
                     ->where(fn ($q) => $q
                         ->where('client_id', $clientId)
                         ->whereNull('deleted_at')
@@ -100,21 +102,21 @@ class CategoryController extends Controller
             'description' => 'nullable|string|max:1000',
         ]);
 
-        $category->update($validated);
+        $brand->update($validated);
 
-        return redirect()->route('categories.index', ['client' => $client])
-            ->with('success', 'Category updated successfully.');
+        return redirect()->route('brands.index', ['client' => $client])
+            ->with('success', 'Brand updated successfully.');
     }
 
-    public function destroy($client, Category $category)
+    public function destroy($client, Brand $brand)
     {
-        if ($category->products()->count() > 0) {
-            return back()->withErrors(['delete' => 'Cannot delete category with products assigned.']);
+        if ($brand->products()->count() > 0) {
+            return back()->withErrors(['delete' => 'Cannot delete brand with products assigned.']);
         }
 
-        $category->delete();
+        $brand->delete();
 
-        return redirect()->route('categories.index', ['client' => $client])
-            ->with('success', 'Category deleted.');
+        return redirect()->route('brands.index', ['client' => $client])
+            ->with('success', 'Brand deleted.');
     }
 }
