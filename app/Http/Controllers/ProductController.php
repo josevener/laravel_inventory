@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\ProductSerial;
 use App\Models\Category;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -151,7 +151,13 @@ class ProductController extends Controller
 
     public function destroy($client, Product $product)
     {
-        $product->delete();
+        DB::transaction(function () use ($product) {
+            $product->update([
+                'sku' => $product->sku . '_deleted_' . $product->id,
+            ]);
+
+            $product->delete();
+        });
 
         return redirect()->route('products.index', ['client' => $client])
             ->with('success', 'Product deleted.');

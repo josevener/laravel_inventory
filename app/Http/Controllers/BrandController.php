@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -114,7 +115,14 @@ class BrandController extends Controller
             return back()->withErrors(['delete' => 'Cannot delete brand with products assigned.']);
         }
 
-        $brand->delete();
+        DB::transaction(function () use ($brand) {
+            $brand->update([
+                'code' => $brand->code . '_deleted_' . $brand->id,
+                'name' => $brand->name . '_deleted_' . $brand->id,
+            ]);
+
+            $brand->delete();
+        });
 
         return redirect()->route('brands.index', ['client' => $client])
             ->with('success', 'Brand deleted.');

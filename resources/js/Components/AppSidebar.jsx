@@ -55,7 +55,7 @@ export function AppSidebar({ ...props }) {
     {
       group: "Point Of Sale",
       items: [
-        { title: "Point Of Sale", url: "pos", icon: Package, permission: "View Products" },
+        { title: "Point Of Sale", url: "pos", icon: Package, permission: "View POS" },
       ],
     },
     {
@@ -76,7 +76,7 @@ export function AppSidebar({ ...props }) {
       group: "Catalogs",
       items: [
         { title: "Categories", url: "categories", icon: ChartBarStacked, permission: "View Categories" },
-        { title: "Brands", url: "brands", icon: ChartBarStacked, permission: "View Categories" },
+        { title: "Brands", url: "brands", icon: ChartBarStacked, permission: "View Brands" },
         { title: "Units", url: "units", icon: Combine, permission: "View Units" },
       ],
     },

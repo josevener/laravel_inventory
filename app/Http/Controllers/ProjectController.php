@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ProjectController extends Controller
@@ -78,10 +79,16 @@ class ProjectController extends Controller
     public function destroy($client, Project $project)
     {
         if ($project->gatePasses()->exists()) {
-            return back()->withErrors(['delete' => 'Cannot delete project with existing gate passes.']);
+            return back()->with('error', 'Cannot delete project with existing gate passes.');
         }
 
-        $project->delete();
+        DB::transaction(function () use ($project) {
+            $project->update([
+                'code' => $project->code . '_deleted_' . $project->id,
+            ]);
+
+            $project->delete();
+        });
 
         return redirect()->route('projects.index', ['client' => $client])
             ->with('success', 'Project deleted.');
