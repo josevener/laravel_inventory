@@ -76,14 +76,12 @@ class GatePassController extends Controller
     {
         $type = $this->detectType($request);
         $authClient = Auth::user()->client;
-        $today = now()->startOfDay();
 
-        $todayCount = GatePass::where('client_id', $authClient->id)
-            ->where('type', 'dispatch' )
-            ->whereDate('created_at', $today)
-            ->count();
+        $lastNumber = GatePass::where('client_id', $authClient->id)
+            ->where('type', 'dispatch')
+            ->max('gate_pass_no');
 
-        $nextNumber = 30000 + $todayCount;
+        $nextNumber = $lastNumber ? $lastNumber + 1 : 3000;
 
         $projects = Project::where('client_id', $authClient->id)
             ->orderBy('company_name')->get(['id', 'name', 'company_name']);
@@ -219,8 +217,8 @@ class GatePassController extends Controller
         //     QrCode::format('svg')->size(140)->errorCorrection('H')
         //         ->generate(route("gatepass.{$type}.print_gatepass", ['gatepass' => $gatepass->id, 'client' => $client]))
         // );
-         $qrCode = base64_encode(
-    QrCode::format('svg')
+        $qrCode = base64_encode(
+            QrCode::format('svg')
                 ->size(140)
                 ->errorCorrection('H')
                 ->generate(
@@ -258,7 +256,7 @@ class GatePassController extends Controller
         ];
 
         $qrCode = base64_encode(
-    QrCode::format('svg')
+            QrCode::format('svg')
                 ->size(140)
                 ->errorCorrection('H')
                 ->generate(
@@ -271,8 +269,8 @@ class GatePassController extends Controller
             'company'  => $company,
             'qrCode'   => $qrCode,
         ])
-        ->setPaper('letter')
-        ->stream("PULL-OUT-{$gatepass->id}.pdf");
+            ->setPaper('letter')
+            ->stream("PULL-OUT-{$gatepass->id}.pdf");
     }
 
     public function dispatchedItems($client, Project $project)
