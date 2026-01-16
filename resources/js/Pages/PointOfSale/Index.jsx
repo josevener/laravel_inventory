@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card"
 import { Button } from "@/Components/ui/button"
 import { Input } from "@/Components/ui/input"
 import { Badge } from "@/Components/ui/badge"
-import CheckoutModal from "./Modals/CheckOutModal"
+import CheckoutModal from "./Modals/CheckoutModal"
 
 export default function POS({ products }) {
   const [cart, setCart] = useState([])
