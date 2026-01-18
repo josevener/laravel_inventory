@@ -18,10 +18,12 @@ class Product extends Model
         'name',
         'category_id',
         'unit_id',
+        'brand_id',
         'current_stock',
         'reorder_level',
         'cost_price',
         'selling_price',
+        'image_path',
         'description',
     ];
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Unit;
@@ -35,7 +36,8 @@ class ProductController extends Controller
                 'serials'
             ])
             ->where('client_id', Auth::user()->client_id)
-            ->orderBy('sku');
+            ->orderBy('sku')
+            ->orderBy('name');
 
         // Apply search if provided
         if ($request->has('q') && $request->filled('q')) {
@@ -47,21 +49,35 @@ class ProductController extends Controller
         }
 
         // Paginate: 20 per page (you can adjust)
-        $products = $query->paginate(20);
+        // $products = $query->paginate(20);
+        $products = $query->paginate(1000);
 
         return response()->json($products);
     }
 
     public function create()
     {
-        return Inertia::render('Products/Create', [
-            'categories' => Category::where('client_id', Auth::user()->client_id)
+        $clientId = Auth::user()->client_id;
+        $isBrandEnable = Auth::user()->client->is_brand_enable;
+        $isPosEnable = Auth::user()->client->is_pos_enable;
+        $isOthersEnable = Auth::user()->client->is_others_enable;
+
+        return Inertia::render('Products/ProductForm', [
+            'categories' => Category::where('client_id', $clientId)
                 ->orderBy('name')
                 ->get(['id', 'name']),
 
-            'units' => Unit::where('client_id', Auth::user()->client_id)
+            'units' => Unit::where('client_id', $clientId)
                 ->orderBy('name')
                 ->get(['id', 'name', 'short_name']),
+
+            'brands' => Brand::where('client_id', $clientId)
+                ->orderBy('name')
+                ->get(['id', 'name']),
+
+            'enable_brands' => (bool) $isBrandEnable,
+            'enable_pos' => (bool) $isPosEnable,
+            'enable_others' => (bool) $isOthersEnable,
         ]);
     }
 
@@ -78,8 +94,40 @@ class ProductController extends Controller
                     ->where(fn($q) => $q->where('client_id', $clientId)),
             ],
             'name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'unit_id' => 'required|exists:units,id',
+            'category_id' => [
+                'required',
+                'integer',
+                function ($attribute, $value, $fail) use ($clientId) {
+                    if ((int) $value === -1) return; // allow "Others"
+            
+                    if (!Category::where('client_id', $clientId)->whereKey($value)->exists()) {
+                        $fail('The selected category is invalid.');
+                    }
+                },
+            ],
+            'unit_id' => [
+                'required',
+                'integer',
+                function ($attribute, $value, $fail) use ($clientId) {
+                    if ((int) $value === -1) return; // allow "Others"
+            
+                    if (!Unit::where('client_id', $clientId)->whereKey($value)->exists()) {
+                        $fail('The selected unit is invalid.');
+                    }
+                },
+            ],
+            'brand_id' => [
+                'nullable',
+                'integer',
+                function ($attribute, $value, $fail) use ($clientId) {
+                    if ($value === null) return;
+                    if ((int) $value === -1) return; // allow "Others"
+            
+                    if (!Brand::where('client_id', $clientId)->whereKey($value)->exists()) {
+                        $fail('The selected brand is invalid.');
+                    }
+                },
+            ],
             'current_stock' => 'required|integer|min:0',
             'reorder_level' => 'required|integer|min:0',
             'cost_price' => 'nullable|numeric|min:0',
@@ -88,6 +136,18 @@ class ProductController extends Controller
         ]);
 
         $validated['client_id'] = Auth::user()->client_id;
+
+        $validated['category_id'] = ((int) $validated['category_id'] === -1)
+            ? null
+            : (int) $validated['category_id'];
+        
+        $validated['unit_id'] = ((int) $validated['unit_id'] === -1)
+            ? null
+            : (int) $validated['unit_id'];
+
+        $validated['brand_id'] = isset($validated['brand_id']) && ((int) $validated['brand_id'] === -1)
+            ? null
+            : (isset($validated['brand_id']) ? (int) $validated['brand_id'] : null);
 
         Product::create($validated);
 
@@ -108,15 +168,30 @@ class ProductController extends Controller
     {
         $product->load(['category', 'unit']);
 
-        return Inertia::render('Products/Edit', [
+        $clientId = Auth::user()->client_id;
+
+        $isBrandEnable = Auth::user()->client->is_brand_enable;
+        $isPosEnable = Auth::user()->client->is_pos_enable;
+        $isOthersEnable = Auth::user()->client->is_others_enable;
+
+        return Inertia::render('Products/ProductForm', [
             'product' => $product,
-            'categories' => Category::where('client_id', Auth::user()->client_id)
+
+            'categories' => Category::where('client_id', $clientId)
                 ->orderBy('name')
                 ->get(['id', 'name']),
 
-            'units' => Unit::where('client_id', Auth::user()->client_id)
+            'units' => Unit::where('client_id', $clientId)
                 ->orderBy('name')
                 ->get(['id', 'name', 'short_name']),
+
+            'brands' => Brand::where('client_id', $clientId)
+                ->orderBy('name')
+                ->get(['id', 'name']),
+
+            'enable_brands' => (bool) $isBrandEnable,
+            'enable_pos' => (bool) $isPosEnable,
+            'enable_others' => (bool) $isOthersEnable,
         ]);
     }
 
@@ -134,14 +209,58 @@ class ProductController extends Controller
                     ->ignore($product->id),
             ],
             'name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'unit_id' => 'required|exists:units,id',
+            'category_id' => [
+                'required',
+                'integer',
+                function ($attribute, $value, $fail) use ($clientId) {
+                    if ((int) $value === -1) return; // allow "Others"
+            
+                    if (!Category::where('client_id', $clientId)->whereKey($value)->exists()) {
+                        $fail('The selected category is invalid.');
+                    }
+                },
+            ],
+            'unit_id' => [
+                'required',
+                'integer',
+                function ($attribute, $value, $fail) use ($clientId) {
+                    if ((int) $value === -1) return; // allow "Others"
+            
+                    if (!Unit::where('client_id', $clientId)->whereKey($value)->exists()) {
+                        $fail('The selected unit is invalid.');
+                    }
+                },
+            ],
+            'brand_id' => [
+                'nullable',
+                'integer',
+                function ($attribute, $value, $fail) use ($clientId) {
+                    if ($value === null) return;
+                    if ((int) $value === -1) return; // allow "Others"
+            
+                    if (!Brand::where('client_id', $clientId)->whereKey($value)->exists()) {
+                        $fail('The selected brand is invalid.');
+                    }
+                },
+            ],
             'current_stock' => 'required|integer|min:0',
             'reorder_level' => 'required|integer|min:0',
             'cost_price' => 'nullable|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
         ]);
+
+        $validated['category_id'] = ((int) $validated['category_id'] === -1)
+            ? null
+            : (int) $validated['category_id'];
+        
+        $validated['unit_id'] = ((int) $validated['unit_id'] === -1)
+            ? null
+            : (int) $validated['unit_id'];
+
+        $validated['brand_id'] = isset($validated['brand_id']) && ((int) $validated['brand_id'] === -1)
+            ? null
+            : (isset($validated['brand_id']) ? (int) $validated['brand_id'] : null);
 
         $product->update($validated);
 

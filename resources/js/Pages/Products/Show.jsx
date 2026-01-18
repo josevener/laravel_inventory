@@ -71,18 +71,21 @@ export default function ProductShow({ product }) {
         {/* Product Info */}
         <Card>
           <CardHeader>
-            <CardTitle>{product.name}</CardTitle>
+            <span className="flex flex-row items-center gap-2">
+              <p className="text-muted-foreground">Product Name: </p>
+              <CardTitle>{product.name}</CardTitle>
+            </span>
             <p className="text-muted-foreground">SKU: {product.sku}</p>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Category</p>
-              <p>{product.category.name}</p>
+              <p>{product.category?.name ?? "Others"}</p>
             </div>
 
             <div>
               <p className="text-sm text-muted-foreground">Unit</p>
-              <p>{product.unit.short_name}</p>
+              <p>{product.unit?.short_name ?? "Others"}</p>
             </div>
 
             <div>

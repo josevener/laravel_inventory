@@ -47,6 +47,9 @@ export default function ClientShow({ client }) {
     is_enable_pullout_gatepass: client?.is_enable_pullout_gatepass ?? true,
     is_enable_warehouses: client?.is_enable_warehouses ?? false,
     is_superadmin: client?.is_superadmin ?? false,
+    is_brand_enable: client?.is_brand_enable ?? false,
+    is_pos_enable: client?.is_pos_enable ?? false,
+    is_others_enable: client?.is_others_enable ?? false,
     is_active: client?.is_active ?? true,
 
     new_users: [],
@@ -68,6 +71,9 @@ export default function ClientShow({ client }) {
         is_enable_pullout_gatepass: client.is_enable_pullout_gatepass ?? true,
         is_enable_warehouses: client.is_enable_warehouses ?? false,
         is_superadmin: client.is_superadmin ?? false,
+        is_brand_enable: client.is_brand_enable ?? false,
+        is_pos_enable: client.is_pos_enable ?? false,
+        is_others_enable: client.is_others_enable ?? false,
         is_active: client.is_active ?? true,
 
         new_users: [],
@@ -340,8 +346,11 @@ export default function ClientShow({ client }) {
                       <h2 className="text-lg font-semibold mb-4">Features & Permissions</h2>
                       <div className="grid gap-4 sm:grid-cols-2">
                         {[
+                          { key: "is_pos_enable", label: "Point of Sale" },
+                          { key: "is_brand_enable", label: "Brands" },
                           { key: "is_enable_dispatch_gatepass", label: "Dispatch Gate Pass" },
                           { key: "is_enable_pullout_gatepass", label: "Pull Out Gate Pass" },
+                          { key: "is_others_enable", label: "Others" },
                           { key: "is_enable_warehouses", label: "Warehouses Management" },
                           {
                             key: "is_superadmin",

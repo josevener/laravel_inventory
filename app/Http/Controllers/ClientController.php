@@ -66,6 +66,9 @@ class ClientController extends Controller
             'is_enable_pullout_gatepass' => 'boolean',
             'is_enable_warehouses' => 'boolean',
             'is_superadmin' => 'boolean',
+            'is_brand_enable' => 'boolean',
+            'is_pos_enable' => 'boolean',
+            'is_others_enable' => 'boolean',
 
             // New related items (arrays)
             'new_users' => 'nullable|array',
@@ -161,6 +164,9 @@ class ClientController extends Controller
                 'is_enable_pullout_gatepass' => 'boolean',
                 'is_enable_warehouses' => 'boolean',
                 'is_superadmin' => 'boolean',
+                'is_brand_enable' => 'boolean',
+                'is_pos_enable' => 'boolean',
+                'is_others_enable' => 'boolean',
                 'is_active' => 'boolean',
     
                 // New related items (same validation)

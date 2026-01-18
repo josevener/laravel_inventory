@@ -253,7 +253,7 @@ export default function GatepassCreate({ type, projects, nextNumber }) {
                     <CardTitle className="flex items-center justify-between">
                       <span className="flex items-center gap-2">
                         <Package className="h-5 w-5" />
-                        Available Products
+                        Available Products ({filteredProducts.length})
                       </span>
                       <div className="relative w-64">
                         <Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
@@ -293,7 +293,7 @@ export default function GatepassCreate({ type, projects, nextNumber }) {
                               onClick={() => !isAdded && addProduct(product)}
                             >
                               <div>
-                                <div className="font-medium">{product.sku} - {product.name}</div>
+                                <div className="font-medium">{product.sku} {product.category?.name ?? null} - {product.name}</div>
                                 <div className="text-sm text-muted-foreground mt-1">
                                   Stock: {product.current_stock} {product.unit_short}
                                   {product.current_stock < product.reorder_level && product.current_stock > 0 && (

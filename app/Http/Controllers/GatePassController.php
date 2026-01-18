@@ -248,7 +248,8 @@ class GatePassController extends Controller
         $gatepass->load([
             'project',
             'client',
-            'items.product.unit',
+            // 'items.product.unit',
+            'items.product' => fn($q) => $q->withTrashed()->with('unit'),
         ]);
 
         $company = [
@@ -310,7 +311,7 @@ class GatePassController extends Controller
                 'name' => $row->product->name,
                 'current_stock' => $row->available_quantity,
                 'dispatched_qty' => $row->available_quantity,
-                'unit_short' => $row->product->unit->short_name,
+                'unit_short' => $row->product->unit?->short_name ?? '',
             ]);
 
         return response()->json($items);

@@ -147,10 +147,14 @@
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>
                         <strong>{{ $item->product->name }}</strong><br>
-                        <small>SKU: {{ $item->product->sku }}</small>
+
+                        @if($item->product->sku)
+                            <small>SKU: {{ $item->product->sku }}</small>
+                        @endif
                     </td>
+
                     <td class="text-center">
-                        {{ $item->quantity }} {{ $item->product->unit->short_name ?? 'Pc' }}
+                        {{ $item->quantity }} {{ $item->product->unit->short_name ?? '(Others)' }}
                     </td>
                 </tr>
             @empty
