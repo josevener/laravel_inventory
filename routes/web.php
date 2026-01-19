@@ -79,6 +79,9 @@ Route::prefix('{client}')->middleware(['auth', 'verify.client'])->group(function
     Route::resource('/users', UserController::class);
 
     Route::get('/pos', [POSController::class, 'index'])->name('pos.index');
+    Route::get('/pos/kitchen_display', [POSController::class, 'kitchen'])->name('pos.kitchen');
+    Route::get('/pos/orders', [POSController::class, 'orders'])->name('pos.orders');
+    Route::get('/pos/tables', [POSController::class, 'tables'])->name('pos.tables');
     Route::post('/pos', [POSController::class, 'store'])->name('pos.store');
 
 });

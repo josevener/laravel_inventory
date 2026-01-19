@@ -13,13 +13,64 @@ class POSController extends Controller
 {
     public function index()
     {
-        $products = Product::where('client_id', Auth::user()->client_id)
+        $products = Product::select('id', 'name', 'sku', 'category_id', 'selling_price', 'current_stock')
+            ->with([
+                'category:id,code,name',
+            ])
+            ->where('client_id', Auth::user()->client_id)
             ->where('is_active', true)
-            ->select('id', 'name', 'sku', 'selling_price', 'current_stock')
             ->orderBy('name')
             ->get();
 
         return Inertia::render('PointOfSale/Index', [
+            'products' => $products
+        ]);
+    }
+
+    public function kitchen()
+    {
+        $products = Product::select('id', 'name', 'sku', 'category_id', 'selling_price', 'current_stock')
+            ->with([
+                'category:id,code,name',
+            ])
+            ->where('client_id', Auth::user()->client_id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('PointOfSale/KitchenDisplay', [
+            'products' => $products
+        ]);
+    }
+
+    public function orders()
+    {
+        $products = Product::select('id', 'name', 'sku', 'category_id', 'selling_price', 'current_stock')
+            ->with([
+                'category:id,code,name',
+            ])
+            ->where('client_id', Auth::user()->client_id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('PointOfSale/Orders', [
+            'products' => $products
+        ]);
+    }
+
+    public function tables()
+    {
+        $products = Product::select('id', 'name', 'sku', 'category_id', 'selling_price', 'current_stock')
+            ->with([
+                'category:id,code,name',
+            ])
+            ->where('client_id', Auth::user()->client_id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('PointOfSale/Tables', [
             'products' => $products
         ]);
     }

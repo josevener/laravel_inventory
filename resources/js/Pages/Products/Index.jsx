@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Head, Link, router } from "@inertiajs/react"
+import { Head, Link, router, usePage } from "@inertiajs/react"
 import { Plus, Package, AlertTriangle, Edit, Trash2, Search, SquareArrowOutUpRight, Package2Icon } from "lucide-react"
 import {
   Table,
@@ -19,12 +19,16 @@ import { useSafeRoute } from "@/hooks/useSafeRoute"
 import { EmptyState } from "@/Components/custom/EmptyState"
 
 export default function ProductsIndex({ products: initialProducts }) {
+  const { auth } = usePage().props
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deletingProduct, setDeletingProduct] = useState(null)
   const [searchInput, setSearchInput] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
 
+
   const safeRoute = useSafeRoute()
+
+  const isPosEnable = auth?.user?.client?.is_pos_enable ? true : false
 
   // Filter only when searchQuery changes
   const filteredProducts = initialProducts.filter(p =>

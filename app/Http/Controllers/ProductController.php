@@ -85,6 +85,8 @@ class ProductController extends Controller
     {
         $clientId = Auth::user()->client_id;
 
+        $isPosEnable = Auth::user()->client->is_pos_enable;
+
         $validated = $request->validate([
             'sku' => [
                 'required',
@@ -130,8 +132,22 @@ class ProductController extends Controller
             ],
             'current_stock' => 'required|integer|min:0',
             'reorder_level' => 'required|integer|min:0',
-            'cost_price' => 'nullable|numeric|min:0',
-            'selling_price' => 'nullable|numeric|min:0',
+            'cost_price' => [
+                $isPosEnable ? 'required' : 'nullable',
+                'numeric',
+                $isPosEnable ? 'min:1' : 'min:0',
+            ],
+            'selling_price' => [
+                'nullable',
+                'numeric',
+                'min:0',
+        
+                // if cost_price is present, selling_price must be >= cost_price
+                Rule::when(
+                    request()->filled('cost_price'),
+                    ['gte:cost_price']
+                ),
+            ],
             'description' => 'nullable|string',
         ]);
 
@@ -199,6 +215,10 @@ class ProductController extends Controller
     {
         $clientId = Auth::user()->client_id;
 
+        $isBrandEnable = Auth::user()->client->is_brand_enable;
+        $isPosEnable = Auth::user()->client->is_pos_enable;
+        $isOthersEnable = Auth::user()->client->is_others_enable;
+
         $validated = $request->validate([
             'sku' => [
                 'required',
@@ -245,8 +265,22 @@ class ProductController extends Controller
             ],
             'current_stock' => 'required|integer|min:0',
             'reorder_level' => 'required|integer|min:0',
-            'cost_price' => 'nullable|numeric|min:0',
-            'selling_price' => 'nullable|numeric|min:0',
+            'cost_price' => [
+                $isPosEnable ? 'required' : 'nullable',
+                'numeric',
+                $isPosEnable ? 'min:1' : 'min:0',
+            ],
+            'selling_price' => [
+                'nullable',
+                'numeric',
+                'min:0',
+        
+                // if cost_price is present, selling_price must be >= cost_price
+                Rule::when(
+                    request()->filled('cost_price'),
+                    ['gte:cost_price']
+                ),
+            ],
             'description' => 'nullable|string',
         ]);
 

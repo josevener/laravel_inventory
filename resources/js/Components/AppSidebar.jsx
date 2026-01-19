@@ -14,6 +14,9 @@ import {
   ArrowUpRight,
   Combine,
   ChartBarStacked,
+  Table,
+  UtensilsCrossed,
+  ClipboardList,
 } from "lucide-react"
 
 import { NavMain } from "@/Components/nav-main"
@@ -42,6 +45,7 @@ export function AppSidebar({ ...props }) {
 
   const clientCode = auth?.user?.client?.code
   const isSuperAdmin = auth?.user?.client?.is_superadmin || false
+  const isPosEnable = auth?.user?.client?.is_pos_enable || false
   const hasViewCompanies = userPermissions.includes("View Companies")
 
   // Define groups and items
@@ -52,12 +56,19 @@ export function AppSidebar({ ...props }) {
         { title: "Dashboard", url: "dashboard", icon: LayoutDashboard, permission: "View Dashboard" },
       ],
     },
-    {
-      group: "Point Of Sale",
-      items: [
-        { title: "Point Of Sale", url: "pos", icon: Package, permission: "View POS" },
-      ],
-    },
+    ...(isPosEnable
+      ? [
+          {
+            group: "Point Of Sale",
+            items: [
+              { title: "POS Screen", url: "pos", icon: Package, permission: "View Products" },
+              { title: "Orders", url: "pos/orders", icon: ClipboardList, permission: "View Products" },
+              { title: "Kitchen Display", url: "pos/kitchen_display", icon: Table, permission: "View Products" },
+              { title: "Tables", url: "pos/tables", icon: UtensilsCrossed, permission: "View Products" },
+            ],
+          },
+        ]
+      : []),
     {
       group: "Maintenance",
       items: [
