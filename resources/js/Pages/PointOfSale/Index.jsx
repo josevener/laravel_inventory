@@ -10,12 +10,12 @@ import {
   Send,
   Wallet,
 } from "lucide-react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Card } from "@/Components/ui/card"
+import { Button } from "@/Components/ui/button"
+import { Input } from "@/Components/ui/input"
+import { Badge } from "@/Components/ui/badge"
+import { Separator } from "@/Components/ui/separator"
+import { ScrollArea } from "@/Components/ui/scroll-area"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { Head, usePage } from "@inertiajs/react"
 

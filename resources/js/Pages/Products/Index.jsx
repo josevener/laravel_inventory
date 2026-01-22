@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { Head, Link, router, usePage } from "@inertiajs/react"
 import { Plus, Package, AlertTriangle, Edit, Trash2, Search, SquareArrowOutUpRight, Package2Icon } from "lucide-react"
 import {
@@ -35,7 +35,8 @@ export default function ProductsIndex({ products: initialProducts }) {
     searchQuery === "" ||
     p.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category.name.toLowerCase().includes(searchQuery.toLowerCase())
+    p.category?.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    p.unit?.short_name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const handleSearch = () => {
@@ -48,11 +49,17 @@ export default function ProductsIndex({ products: initialProducts }) {
     }
   }
 
-  const clearSearch = () => {
-    setSearchInput("")
-    setSearchQuery("")
-  }
+  const clearSearch = useCallback(() => {
+    setSearchQuery("");
+    setSearchInput("");
+  }, []);
 
+  useEffect(() => {
+    if (searchQuery && searchInput.length === 0) {
+      clearSearch();
+    }
+  }, [searchInput, searchQuery, clearSearch]);
+  
   const openDeleteDialog = (product) => {
     setDeletingProduct(product)
     setDeleteDialogOpen(true)
@@ -139,84 +146,100 @@ export default function ProductsIndex({ products: initialProducts }) {
             </CardHeader>
             <CardContent>
               <div className="rounded-md border max-h-[calc(100vh-280px)] overflow-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead></TableHead>
-                        <TableHead>SKU / Name</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Unit</TableHead>
-                        <TableHead className="text-right">Stock</TableHead>
-                        <TableHead className="text-center">Status</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredProducts.map((product) => {
-                          const isLow = product.current_stock > 0 && product.current_stock < product.reorder_level
-                          const isOut = product.current_stock === 0
+                <Table className="border-collapse">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead></TableHead>
+                      <TableHead>SKU / Name</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Unit</TableHead>
+                      {isPosEnable && (
+                        <>
+                          <TableHead className="text-right">Cost Price</TableHead>
+                          <TableHead className="text-right">Selling Price</TableHead>
+                        </>
+                      )}
+                      <TableHead className="text-right">Stock</TableHead>
+                      <TableHead className="text-center">Remarks</TableHead>
+                      <TableHead className="text-center">Active</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredProducts.map((product) => {
+                        const isLow = product.current_stock > 0 && product.current_stock < product.reorder_level
+                        const isOut = product.current_stock === 0
 
-                          return (
-                            <TableRow key={product.id}>
-                              <TableCell>
-                                <Button 
-                                  onClick={() => router.visit(safeRoute("products.show", { product: product.id }))}
-                                  className="cursor-pointer bg-transparent hover:bg-gray-50"
-                                >
-                                  <SquareArrowOutUpRight className="h-5 w-5 text-green-500" />
+                        return (
+                          <TableRow key={product.id} className="border-b">
+                            <TableCell>
+                              <Button 
+                                onClick={() => router.visit(safeRoute("products.show", { product: product.id }))}
+                                className="cursor-pointer bg-transparent hover:bg-gray-50"
+                              >
+                                <SquareArrowOutUpRight className="h-5 w-5 text-green-500" />
+                              </Button>
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              <div>
+                                <div className="font-mono text-sm font-semibold">{product.sku}</div>
+                                <div className="text-sm text-foreground">{product.name}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{product.category?.name ?? "Others"}</TableCell>
+                            <TableCell>{product.unit?.short_name ?? "Others"}</TableCell>
+                            {isPosEnable && (
+                              <>
+                                <TableCell className="text-right">{product.cost_price}</TableCell>
+                                <TableCell className="text-right">{product.selling_price}</TableCell>
+                              </>
+                            )}
+                            <TableCell className="text-right font-semibold">
+                              <span className={isOut ? "text-destructive" : isLow ? "text-orange-600" : "text-green-600"}>
+                                {product.current_stock}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {isLow ? (
+                                <Badge variant="destructive" className="flex items-center gap-1 w-fit mx-auto">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  Low Stock
+                                </Badge>
+                              ) : isOut ? (
+                                <Badge variant="secondary">Out of Stock</Badge>
+                              ) : (
+                                <Badge variant="default">In Stock</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center font-semibold">
+                              {product.status ? 'Yes' : 'No'}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button variant="outline" size="sm" asChild>
+                                  <Link href={safeRoute("products.edit", { product: product.id })}>
+                                    <Edit className="h-4 w-4" />
+                                  </Link>
                                 </Button>
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                <div>
-                                  <div className="font-mono text-sm font-semibold">{product.sku}</div>
-                                  <div className="text-sm text-foreground">{product.name}</div>
-                                </div>
-                              </TableCell>
-                              <TableCell>{product.category?.name}</TableCell>
-                              <TableCell>{product.unit?.short_name}</TableCell>
-                              <TableCell className="text-right font-semibold">
-                                <span className={isOut ? "text-destructive" : isLow ? "text-orange-600" : "text-green-600"}>
-                                  {product.current_stock}
-                                </span>
-                              </TableCell>
-                              <TableCell className="text-center">
-                                {isLow ? (
-                                  <Badge variant="destructive" className="flex items-center gap-1 w-fit mx-auto">
-                                    <AlertTriangle className="h-3 w-3" />
-                                    Low Stock
-                                  </Badge>
-                                ) : isOut ? (
-                                  <Badge variant="secondary">Out of Stock</Badge>
-                                ) : (
-                                  <Badge variant="default">In Stock</Badge>
-                                )}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  <Button variant="outline" size="sm" asChild>
-                                    <Link href={safeRoute("products.edit", { product: product.id })}>
-                                      <Edit className="h-4 w-4" />
-                                    </Link>
-                                  </Button>
-                                  <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => openDeleteDialog(product)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          )
-                        })
-                      }
-                    </TableBody>
-                  </Table>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => openDeleteDialog(product)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })
+                    }
+                  </TableBody>
+                </Table>
               </div>
             </CardContent>
           </Card>
-         ) : (
+        ) : (
           <EmptyState
             icon={Package2Icon}
             title="No Products Yet"
