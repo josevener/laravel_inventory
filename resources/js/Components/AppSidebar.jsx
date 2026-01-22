@@ -46,6 +46,7 @@ export function AppSidebar({ ...props }) {
   const clientCode = auth?.user?.client?.code
   const isSuperAdmin = auth?.user?.client?.is_superadmin || false
   const isPosEnable = auth?.user?.client?.is_pos_enable || false
+  const isBrandEnable = auth?.user?.client?.is_brand_enable || false
   const hasViewCompanies = userPermissions.includes("View Companies")
 
   // Define groups and items
@@ -87,7 +88,9 @@ export function AppSidebar({ ...props }) {
       group: "Catalogs",
       items: [
         { title: "Categories", url: "categories", icon: ChartBarStacked, permission: "View Categories" },
-        { title: "Brands", url: "brands", icon: ChartBarStacked, permission: "View Brands" },
+        ...(isBrandEnable
+          ? [{ title: "Brands", url: "brands", icon: ChartBarStacked, permission: "View Categories" }]
+          : []),
         { title: "Units", url: "units", icon: Combine, permission: "View Units" },
       ],
     },

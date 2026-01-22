@@ -6,19 +6,16 @@ import {
   Minus, 
   X, 
   UtensilsCrossed, 
-  LayoutDashboard, 
   ClipboardList, 
-  LogOut, 
   Send, 
   Wallet 
 } from 'lucide-react';
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Card } from "@/Components/ui/card";
+import { Button } from "@/Components/ui/button";
+import { Input } from "@/Components/ui/input";
+import { Badge } from "@/Components/ui/badge";
+import { Separator } from "@/Components/ui/separator";
+import { ScrollArea } from "@/Components/ui/scroll-area";
 
 const menuItems = [
   { id: 1, name: 'Caesar Salad', price: 9.99, icon: '🥗', category: 'Appetizers' },

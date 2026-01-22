@@ -25,11 +25,13 @@ class Product extends Model
         'selling_price',
         'image_path',
         'description',
+        'status',
     ];
 
     protected $casts = [
         'cost_price' => 'decimal:2',
         'selling_price' => 'decimal:2',
+        'active' => 'boolean',
     ];
 
     protected $guarded = ['id'];

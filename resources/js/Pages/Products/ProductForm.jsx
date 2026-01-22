@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Comp
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { Info, Package } from "lucide-react"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
+import { Checkbox } from "@/Components/ui/checkbox"
 
 export default function ProductForm({ product, categories, units, brands, enable_brands, enable_pos, enable_others }) {
   const safeRoute = useSafeRoute()
@@ -24,6 +25,7 @@ export default function ProductForm({ product, categories, units, brands, enable
     current_stock: product?.current_stock || 0,
     reorder_level: product?.reorder_level || 10,
     description: product?.description || "",
+    status: product?.status || true,
   })
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -58,12 +60,32 @@ export default function ProductForm({ product, categories, units, brands, enable
             {/* Left */}
             <div className="space-y-2">
               <div>
-                <Label htmlFor="sku">SKU <span className="text-destructive">*</span></Label>
+                <Label htmlFor="sku" className="flex items-center gap-2">
+                  Stock Keeping Unit <span>(SKU)</span>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground transition"
+                        >
+                          <Info className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="font-medium">SKU</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Unique product code used for tracking inventory and sales.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </Label>
                 <Input
                   id="sku"
                   value={data.sku}
                   onChange={(e) => setData("sku", e.target.value)}
-                  placeholder="e.g. CEM-001"
+                  placeholder="Leave blank to auto-generate, or enter your own unique SKU."
                   className="mt-1.5 font-mono"
                 />
                 {errors.sku && <p className="text-sm text-destructive mt-1.5">{errors.sku}</p>}
@@ -173,6 +195,17 @@ export default function ProductForm({ product, categories, units, brands, enable
                 {errors.unit_id && <p className="text-sm text-destructive mt-1.5">{errors.unit_id}</p>}
               </div>
 
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="active"
+                  checked={!!data.status}
+                  onCheckedChange={(checked) => setData("status", !!checked)}
+                />
+                <Label htmlFor="active">
+                  This product is {data.status ? "active" : "inactive"}
+                </Label>
+              </div>
+              
               {enable_brands && (
                 <div>
                   <Label className="flex items-center gap-2">
