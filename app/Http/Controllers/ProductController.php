@@ -6,6 +6,7 @@ use App\Models\Brand;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Unit;
+use App\Services\SkuService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -29,7 +30,7 @@ class ProductController extends Controller
     public function list(Request $request)
     {
         $query = Product::query()
-            ->select('id', 'sku', 'name', 'current_stock', 'reorder_level', 'unit_id', 'category_id')
+            ->select('id', 'sku', 'name', 'current_stock', 'reorder_level', 'unit_id', 'category_id', 'active')
             ->with([
                 'unit:id,name,short_name', 
                 'category:id,code,name',
@@ -86,10 +87,11 @@ class ProductController extends Controller
         $clientId = Auth::user()->client_id;
 
         $isPosEnable = Auth::user()->client->is_pos_enable;
+        $skuService = new SkuService();
 
         $validated = $request->validate([
             'sku' => [
-                'required',
+                'nullable',
                 'string',
                 'max:50',
                 Rule::unique('products')
@@ -149,6 +151,7 @@ class ProductController extends Controller
                 ),
             ],
             'description' => 'nullable|string',
+            'status' => 'required|boolean',
         ]);
 
         $validated['client_id'] = Auth::user()->client_id;
@@ -164,6 +167,35 @@ class ProductController extends Controller
         $validated['brand_id'] = isset($validated['brand_id']) && ((int) $validated['brand_id'] === -1)
             ? null
             : (isset($validated['brand_id']) ? (int) $validated['brand_id'] : null);
+
+        $validated['sku'] = trim($validated['sku'] ?? '');
+
+        if ($validated['sku'] === '') {
+            $category = $validated['category_id']
+                ? Category::where('client_id', $clientId)->find($validated['category_id'])
+                : null;
+
+            $unit = $validated['unit_id']
+                ? Unit::where('client_id', $clientId)->find($validated['unit_id'])
+                : null;
+
+            $brand = $validated['brand_id']
+                ? Brand::where('client_id', $clientId)->find($validated['brand_id'])
+                : null;
+
+            $categoryCode = $category?->code ?? 'OT';
+            $unitCode = $unit?->short_name ?? 'OT';
+
+            $isBrandEnable = (bool) Auth::user()->client->is_brand_enable;
+            $brandCode = ($isBrandEnable && $brand) ? $brand->code : null;
+
+            $validated['sku'] = $skuService->generate(
+                $clientId,
+                $categoryCode,
+                $unitCode,
+                $brandCode
+            );
+        }
 
         Product::create($validated);
 
@@ -221,7 +253,7 @@ class ProductController extends Controller
 
         $validated = $request->validate([
             'sku' => [
-                'required',
+                'nullable',
                 'string',
                 'max:50',
                 Rule::unique('products')
@@ -282,6 +314,7 @@ class ProductController extends Controller
                 ),
             ],
             'description' => 'nullable|string',
+            'status' => 'required|boolean',
         ]);
 
         $validated['category_id'] = ((int) $validated['category_id'] === -1)
@@ -296,6 +329,37 @@ class ProductController extends Controller
             ? null
             : (isset($validated['brand_id']) ? (int) $validated['brand_id'] : null);
 
+        $skuService = new SkuService();
+
+        $validated['sku'] = trim($validated['sku'] ?? '');
+        
+        if ($validated['sku'] === '') {
+            $category = $validated['category_id']
+                ? Category::where('client_id', $clientId)->find($validated['category_id'])
+                : null;
+        
+            $unit = $validated['unit_id']
+                ? Unit::where('client_id', $clientId)->find($validated['unit_id'])
+                : null;
+        
+            $brand = $validated['brand_id']
+                ? Brand::where('client_id', $clientId)->find($validated['brand_id'])
+                : null;
+        
+            $categoryCode = $category?->code ?? 'OT';
+            $unitCode = $unit?->short_name ?? 'OT';
+        
+            $isBrandEnable = (bool) Auth::user()->client->is_brand_enable;
+            $brandCode = ($isBrandEnable && $brand) ? $brand->code : null;
+        
+            $validated['sku'] = $skuService->generate(
+                $clientId,
+                $categoryCode,
+                $unitCode,
+                $brandCode
+            );
+        }
+            
         $product->update($validated);
 
         return redirect()->route('products.index', ['client' => $client])
