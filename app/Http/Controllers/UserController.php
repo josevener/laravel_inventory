@@ -13,6 +13,8 @@ use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Validators\ValidationException;
+use Throwable;
 
 class UserController extends Controller
 {
@@ -186,68 +188,51 @@ class UserController extends Controller
             ->with('success', 'User deleted.');
     }
 
-    // In UserController.php
-
-    // public function export()
-    // {
-    //     $csv = "Name,Email,Client,Roles,Joined\n";
-    //     foreach (User::with(['client', 'roles'])->get() as $user) {
-    //         $csv .= "\"{$user->name}\",\"{$user->email}\",\"{$user->client?->name}\",\"{$user->role_list}\",\"{$user->created_at}\"\n";
-    //     }
-
-    //     return response($csv)
-    //         ->header('Content-Type', 'text/csv')
-    //         ->header('Content-Disposition', 'attachment; filename=users.csv');
-    // }
     public function export($client)
     {
-        return Excel::download(new UsersExport, 'users.xlsx');
+        return Excel::download(new UsersExport, 'User Lists.xlsx');
     }
 
-    // public function import(Request $request)
-    // {
-    //     $request->validate([
-    //         'file' => 'required|mimes:csv,txt'
-    //     ]);
-
-    //     // Simple CSV import (you can improve with Laravel Excel)
-    //     $file = $request->file('file');
-    //     $handle = fopen($file, "r");
-    //     fgetcsv($handle); // skip header
-
-    //     while (($data = fgetcsv($handle)) !== false) {
-    //         [$name, $email, $clientName, $rolesStr, $password] = $data;
-
-    //         $client = Client::where('name', 'like', "%$clientName%")->first();
-    //         if (!$client)
-    //             continue;
-
-    //         $user = User::updateOrCreate(
-    //             ['email' => $email],
-    //             [
-    //                 'name' => $name,
-    //                 'password' => Hash::make($password ?: 'password123'),
-    //                 'client_id' => $client->id,
-    //             ]
-    //         );
-
-    //         $roles = array_filter(array_map('trim', explode(',', $rolesStr)));
-    //         $user->syncRoles($roles);
-    //     }
-
-    //     fclose($handle);
-
-    //     return back()->with('success', 'Users imported!');
-    // }
     public function import($client, Request $request)
     {
         $request->validate([
             'file' => 'required|mimes:xlsx,xls'
         ]);
-
-        Excel::import(new UsersImport, $request->file('file'));
-
-        return redirect()->route('users.index', ['client' => $client])
-            ->with('success', 'Users imported successfully!');
+    
+        $importer = new UsersImport();
+    
+        try {
+            Excel::import($importer, $request->file('file'));
+    
+            return redirect()
+                ->route('users.index', ['client' => $client])
+                ->with('success', 'Users import completed!')
+                ->with('import_summary', [
+                    'imported' => $importer->imported,
+                    'updated' => $importer->updated,
+                    'skipped' => $importer->skipped,
+                    'imported_rows' => $importer->importedRows,
+                    'updated_rows' => $importer->updatedRows,
+                    'skipped_rows' => $importer->skippedRows,
+                ]);
+        }
+        catch (ValidationException $e) {
+            $errors = [];
+    
+            foreach ($e->failures() as $failure) {
+                foreach ($failure->errors() as $error) {
+                    $errors[] = "Row {$failure->row()}: {$error}";
+                }
+            }
+    
+            return redirect()
+                ->back()
+                ->with('errors', $errors);
+        }
+        catch (Throwable $e) {
+            return redirect()
+                ->back()
+                ->with('errors', ['Import failed: ' . $e->getMessage()]);
+        }
     }
 }

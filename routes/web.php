@@ -74,8 +74,8 @@ Route::prefix('{client}')->middleware(['auth', 'verify.client'])->group(function
         Route::resource('/permissions', PermissionController::class);
     });
 
-    Route::post('/users/import', [UserController::class, 'import'])->name('users.import');
     Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
+    Route::post('/users/import', [UserController::class, 'import'])->name('users.import');
     Route::resource('/users', UserController::class);
 
     Route::get('/pos', [POSController::class, 'index'])->name('pos.index');

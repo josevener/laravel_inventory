@@ -18,7 +18,7 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::where('client_id', Auth::user()->client_id)
-            ->with(['category', 'unit', 'serials'])
+            ->with(['category', 'unit', 'brand', 'serials'])
             ->orderBy('name')
             ->get();
 
@@ -30,10 +30,21 @@ class ProductController extends Controller
     public function list(Request $request)
     {
         $query = Product::query()
-            ->select('id', 'sku', 'name', 'current_stock', 'reorder_level', 'unit_id', 'category_id', 'active')
+            ->select(
+                'id', 
+                'sku', 
+                'name', 
+                'current_stock', 
+                'reorder_level', 
+                'unit_id', 
+                'brand_id', 
+                'category_id', 
+                'active'
+            )
             ->with([
                 'unit:id,name,short_name', 
                 'category:id,code,name',
+                'brand:id,code,name',
                 'serials'
             ])
             ->where('client_id', Auth::user()->client_id)
@@ -49,7 +60,7 @@ class ProductController extends Controller
             });
         }
 
-        // Paginate: 20 per page (you can adjust)
+        // Paginate: 20 per page
         // $products = $query->paginate(20);
         $products = $query->paginate(1000);
 
@@ -170,6 +181,7 @@ class ProductController extends Controller
 
         $validated['sku'] = trim($validated['sku'] ?? '');
 
+        // If sku is null or empty, auto-generate
         if ($validated['sku'] === '') {
             $category = $validated['category_id']
                 ? Category::where('client_id', $clientId)->find($validated['category_id'])
@@ -183,11 +195,11 @@ class ProductController extends Controller
                 ? Brand::where('client_id', $clientId)->find($validated['brand_id'])
                 : null;
 
-            $categoryCode = $category?->code ?? 'OT';
-            $unitCode = $unit?->short_name ?? 'OT';
+            $categoryCode = $category?->code ?? 'COT';
+            $unitCode = $unit?->short_name ?? 'NOT';
 
             $isBrandEnable = (bool) Auth::user()->client->is_brand_enable;
-            $brandCode = ($isBrandEnable && $brand) ? $brand->code : null;
+            $brandCode = ($isBrandEnable && $brand) ? $brand->code : "BOT";
 
             $validated['sku'] = $skuService->generate(
                 $clientId,
@@ -333,6 +345,7 @@ class ProductController extends Controller
 
         $validated['sku'] = trim($validated['sku'] ?? '');
         
+        // If sku is null or empty, auto-generate
         if ($validated['sku'] === '') {
             $category = $validated['category_id']
                 ? Category::where('client_id', $clientId)->find($validated['category_id'])
@@ -346,11 +359,11 @@ class ProductController extends Controller
                 ? Brand::where('client_id', $clientId)->find($validated['brand_id'])
                 : null;
         
-            $categoryCode = $category?->code ?? 'OT';
-            $unitCode = $unit?->short_name ?? 'OT';
+            $categoryCode = $category?->code ?? 'COT';
+            $unitCode = $unit?->short_name ?? 'NOT';
         
             $isBrandEnable = (bool) Auth::user()->client->is_brand_enable;
-            $brandCode = ($isBrandEnable && $brand) ? $brand->code : null;
+            $brandCode = ($isBrandEnable && $brand) ? $brand->code : "BOT";
         
             $validated['sku'] = $skuService->generate(
                 $clientId,

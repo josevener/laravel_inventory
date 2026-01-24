@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Head, Link, router, usePage } from "@inertiajs/react"
+import { Head, Link, router, useForm, usePage } from "@inertiajs/react"
 import { 
   Plus, Users, Shield, Trash2, Edit, Search, Download, Upload
 } from "lucide-react"
@@ -12,15 +12,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/u
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
 import useHasPermission from "@/hooks/useHasPermission"
+import ImportSummaryDialog from "@/Components/ImportSummaryDialog"
 
 export default function Index({ users: initialUsers }) {
   const [search, setSearch] = useState("")
   const [openImport, setOpenImport] = useState(false)
   const safeRoute = useSafeRoute()
-  const { auth, csrf_token } = usePage().props
+  const { auth, flash } = usePage().props
+  const import_summary = flash?.import_summary
   const hasPermission = useHasPermission()
 
   const isSuperAdmin = auth?.user?.client?.is_superadmin ? true : false
+
+  const { data, setData, post, processing, errors } = useForm({
+    file: null,
+  })
 
   const filteredUsers = initialUsers.filter(user =>
     user.first_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -31,10 +37,13 @@ export default function Index({ users: initialUsers }) {
     user.role_list?.toLowerCase().includes(search.toLowerCase())
   )
 
-  const submit = (e) => {
+  const submitImport = (e) => {
     e.preventDefault()
-    const formData = new FormData(e.target)
-    router.post(safeRoute("users.import"), formData)
+
+    post(safeRoute("users.import"), {
+      forceFormData: true,
+      onSuccess: () => setOpenImport(false),
+    })
   }
   
   return (
@@ -167,18 +176,31 @@ export default function Index({ users: initialUsers }) {
           <DialogHeader>
             <DialogTitle>Import Users from Excel</DialogTitle>
           </DialogHeader>
-          <form action={safeRoute("users.import")} method="POST" encType="multipart/form-data">
-            <input type="hidden" name="_token" value={csrf_token} />
-            <input type="file" name="file" accept=".xlsx,.xls" required className="mb-4" />
-            <div className="flex justify-end gap-3">
+          <form onSubmit={submitImport} encType="multipart/form-data">
+            <Input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={(e) => setData("file", e.target.files[0])}
+              required
+            />
+
+            {errors.file && <p className="text-sm text-destructive mt-2">{errors.file}</p>}
+
+            <div className="flex justify-end gap-3 mt-4">
               <Button type="button" variant="outline" onClick={() => setOpenImport(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Import Excel</Button>
+              <Button type="submit" disabled={processing}>
+                {processing ? "Importing..." : "Import Excel"}
+              </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      {import_summary && (
+        <ImportSummaryDialog />
+      )}
     </AuthenticatedLayout>
   )
 }

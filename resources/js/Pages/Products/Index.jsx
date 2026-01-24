@@ -29,6 +29,7 @@ export default function ProductsIndex({ products: initialProducts }) {
   const safeRoute = useSafeRoute()
 
   const isPosEnable = auth?.user?.client?.is_pos_enable ? true : false
+  const isBrandEnable = auth?.user?.client?.is_brand_enable ? true : false
 
   // Filter only when searchQuery changes
   const filteredProducts = initialProducts.filter(p =>
@@ -151,6 +152,11 @@ export default function ProductsIndex({ products: initialProducts }) {
                     <TableRow>
                       <TableHead></TableHead>
                       <TableHead>SKU / Name</TableHead>
+                      {isBrandEnable && (
+                        <>
+                          <TableHead>Brand</TableHead>
+                        </>
+                      )}
                       <TableHead>Category</TableHead>
                       <TableHead>Unit</TableHead>
                       {isPosEnable && (
@@ -160,7 +166,7 @@ export default function ProductsIndex({ products: initialProducts }) {
                         </>
                       )}
                       <TableHead className="text-right">Stock</TableHead>
-                      <TableHead className="text-center">Remarks</TableHead>
+                      <TableHead className="text-center">Status</TableHead>
                       <TableHead className="text-center">Active</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -182,10 +188,15 @@ export default function ProductsIndex({ products: initialProducts }) {
                             </TableCell>
                             <TableCell className="font-medium">
                               <div>
-                                <div className="font-mono text-sm font-semibold">{product.sku}</div>
-                                <div className="text-sm text-foreground">{product.name}</div>
+                                <div className="font-mono text-sm font-semibold">{product.name}</div>
+                                <div className="text-sm text-foreground">{product.sku}</div>
                               </div>
                             </TableCell>
+                            {isBrandEnable && (
+                              <>
+                                <TableCell>{product.brand?.name ?? "Others"}</TableCell>
+                              </>
+                            )}
                             <TableCell>{product.category?.name ?? "Others"}</TableCell>
                             <TableCell>{product.unit?.short_name ?? "Others"}</TableCell>
                             {isPosEnable && (
