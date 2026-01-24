@@ -3,36 +3,52 @@
 namespace App\Exports;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 
-class UsersExport implements FromCollection, WithHeadings, WithMapping
+class UsersExport implements FromCollection, WithHeadings, WithMapping, WithColumnWidths
 {
     public function collection()
     {
-        return User::with(['client', 'roles'])->get();
+        return User::query()
+            ->select(['id', 'first_name', 'last_name', 'email', 'client_id'])
+            ->with('roles')
+            ->where('client_id', Auth::user()->client_id)
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
     }
 
     public function headings(): array
     {
         return [
-            'Name',
-            'Email',
-            // 'Client',
+            'FirstName',
+            'LastName',
+            'EmailAddress',
             'Roles',
-            'Joined Date',
         ];
     }
 
     public function map($user): array
     {
         return [
-            $user->name,
+            $user->first_name,
+            $user->last_name,
             $user->email,
-            // $user->client?->name ?? '—',
             $user->getRoleNames()->implode(', '),
-            $user->created_at->format('M d, Y'),
+        ];
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 18,
+            'B' => 18,
+            'C' => 30,
+            'D' => 35,
         ];
     }
 }
