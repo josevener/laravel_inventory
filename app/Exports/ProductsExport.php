@@ -12,10 +12,12 @@ use Maatwebsite\Excel\Concerns\WithColumnWidths;
 class ProductsExport implements FromCollection, WithHeadings, WithMapping, WithColumnWidths
 {
     protected bool $brandEnabled;
+    protected bool $posEnabled;
 
     public function __construct()
     {
         $this->brandEnabled = (bool) Auth::user()?->client?->is_brand_enable;
+        $this->posEnabled   = (bool) Auth::user()?->client?->is_pos_enable;
     }
 
     public function collection()
@@ -52,67 +54,68 @@ class ProductsExport implements FromCollection, WithHeadings, WithMapping, WithC
 
     public function headings(): array
     {
-        $headers = [
-            'ProductName',
-        ];
+        $headers = ['ProductName'];
 
         if ($this->brandEnabled) {
             $headers[] = 'Brand';
         }
 
-        return array_merge($headers, [
-            'Category',
-            'Unit',
-            'CurrentStock',
-            'ReorderLevel',
-            'CostPrice',
-            'SellingPrice',
-        ]);
+        $headers[] = 'Category';
+        $headers[] = 'Unit';
+        $headers[] = 'CurrentStock';
+        $headers[] = 'ReorderLevel';
+
+        if ($this->posEnabled) {
+            $headers[] = 'CostPrice';
+            $headers[] = 'SellingPrice';
+        }
+
+        return $headers;
     }
 
     public function map($product): array
     {
-        $row = [
-            $product->name,
-        ];
+        $row = [$product->name];
 
         if ($this->brandEnabled) {
             $row[] = $product->brand?->name;
         }
 
-        return array_merge($row, [
-            $product->category?->name,
-            $product->unit?->short_name,
-            $product->current_stock,
-            $product->reorder_level,
-            $product->cost_price,
-            $product->selling_price,
-        ]);
+        $row[] = $product->category?->name;
+        $row[] = $product->unit?->short_name;
+        $row[] = $product->current_stock;
+        $row[] = $product->reorder_level;
+
+        if ($this->posEnabled) {
+            $row[] = $product->cost_price;
+            $row[] = $product->selling_price;
+        }
+
+        return $row;
     }
 
     public function columnWidths(): array
     {
+        $cols = [];
+
+        $cols['A'] = 30; // ProductName
+        $next = 'B';
+
         if ($this->brandEnabled) {
-            return [
-                'A' => 30, // ProductName
-                'B' => 18, // Brand
-                'C' => 18, // Category
-                'D' => 15, // Unit
-                'E' => 15, // CurrentStock
-                'F' => 15, // ReorderLevel
-                'G' => 15, // CostPrice
-                'H' => 15, // SellingPrice
-            ];
+            $cols[$next] = 18; // Brand
+            $next++;
         }
 
-        return [
-            'A' => 30, // ProductName
-            'B' => 18, // Category
-            'C' => 15, // Unit
-            'D' => 15, // CurrentStock
-            'E' => 15, // ReorderLevel
-            'F' => 15, // CostPrice
-            'G' => 15, // SellingPrice
-        ];
+        $cols[$next++] = 18; // Category
+        $cols[$next++] = 15; // Unit
+        $cols[$next++] = 15; // CurrentStock
+        $cols[$next++] = 15; // ReorderLevel
+
+        if ($this->posEnabled) {
+            $cols[$next++] = 15; // CostPrice
+            $cols[$next++] = 15; // SellingPrice
+        }
+
+        return $cols;
     }
 }
