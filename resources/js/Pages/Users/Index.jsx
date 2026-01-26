@@ -30,7 +30,7 @@ export default function Index({ users: initialUsers }) {
 
   const filteredUsers = initialUsers.filter(user =>
     user.first_name.toLowerCase().includes(search.toLowerCase()) ||
-    user.middle_name.toLowerCase().includes(search.toLowerCase()) ||
+    user.middle_name?.toLowerCase().includes(search.toLowerCase()) ||
     user.last_name.toLowerCase().includes(search.toLowerCase()) ||
     user.email.toLowerCase().includes(search.toLowerCase()) ||
     user.client?.toLowerCase().includes(search.toLowerCase()) ||
@@ -103,69 +103,71 @@ export default function Index({ users: initialUsers }) {
             <CardTitle>All Users ({filteredUsers.length})</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  {isSuperAdmin && <TableHead>Client</TableHead>}
-                  <TableHead>Roles</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.first_name} {user.middle_name} {user.last_name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    {isSuperAdmin && (
-                      <TableCell>
-                        <Badge variant="outline">{user.client || "—"}</Badge>
-                      </TableCell>
-                    )}
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {user.roles.length === 0 ? (
-                          <Badge variant="secondary">No role</Badge>
-                        ) : (
-                          user.roles.map((role) => (
-                            <Badge key={role} variant="secondary">
-                              <Shield className="h-3 w-3 mr-1" />
-                              {role}
-                            </Badge>
-                          ))
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {user.created_at}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button size="sm" variant="ghost" asChild>
-                          <Link href={safeRoute("users.edit", { user: user.id })}>
-                            <Edit className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        {user.id !== auth.user.id && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-destructive"
-                            onClick={() => confirm("Delete user?") && 
-                              router.delete(safeRoute("users.destroy", { user: user.id }))
-                            }
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
+            <div className="rounded-md border max-h-[calc(100vh-250px)] overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    {isSuperAdmin && <TableHead>Client</TableHead>}
+                    <TableHead>Roles</TableHead>
+                    <TableHead>Joined</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody className="border-collapse">
+                  {filteredUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">{user.first_name} {user.middle_name} {user.last_name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      {isSuperAdmin && (
+                        <TableCell>
+                          <Badge variant="outline">{user.client || "—"}</Badge>
+                        </TableCell>
+                      )}
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {user.roles.length === 0 ? (
+                            <Badge variant="secondary">No role</Badge>
+                          ) : (
+                            user.roles.map((role) => (
+                              <Badge key={role} variant="secondary">
+                                <Shield className="h-3 w-3 mr-1" />
+                                {role}
+                              </Badge>
+                            ))
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {user.created_at}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" variant="ghost" asChild>
+                            <Link href={safeRoute("users.edit", { user: user.id })}>
+                              <Edit className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                          {user.id !== auth.user.id && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-destructive"
+                              onClick={() => confirm("Delete user?") && 
+                                router.delete(safeRoute("users.destroy", { user: user.id }))
+                              }
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -174,7 +176,7 @@ export default function Index({ users: initialUsers }) {
       <Dialog open={openImport} onOpenChange={setOpenImport}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Import Users from Excel</DialogTitle>
+            <DialogTitle>Import Users</DialogTitle>
           </DialogHeader>
           <form onSubmit={submitImport} encType="multipart/form-data">
             <Input
