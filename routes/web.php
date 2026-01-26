@@ -38,7 +38,11 @@ Route::prefix('{client}')->middleware(['auth', 'verify.client'])->group(function
 
     Route::get('/products/search', [ProductController::class, 'search'])->name('products.search');
     Route::get('/products/list', [ProductController::class, 'list'])->name('products.list');
+    Route::get('/products/export', [ProductController::class, 'export'])->name('products.export');
     Route::resource('/products', ProductController::class);
+
+    Route::post('/product-serials', [ProductSerialController::class, 'store'])->name('product-serials.store');
+    Route::delete('/product-serials/{serial}', [ProductSerialController::class, 'destroy'])->name('product-serials.destroy');
 
     Route::prefix('gatepass')->group(function () {
         Route::prefix('dispatch')->group(function () {
@@ -59,14 +63,10 @@ Route::prefix('{client}')->middleware(['auth', 'verify.client'])->group(function
             ->name('gatepass.project.dispatched_items');
     });
 
-
     Route::resource('/brands', BrandController::class);
     Route::resource('/categories', CategoryController::class);
     Route::resource('/projects', ProjectController::class);
     Route::resource('/units', UnitController::class);
-
-    Route::post('/product-serials', [ProductSerialController::class, 'store'])->name('product-serials.store');
-    Route::delete('/product-serials/{serial}', [ProductSerialController::class, 'destroy'])->name('product-serials.destroy');
 
     Route::prefix('roles-permissions')->group(function () {
         Route::get('/', [RolePermissionController::class, 'index'])->name('roles-permissions.index');

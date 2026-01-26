@@ -76,7 +76,7 @@ export default function Index({ users: initialUsers }) {
             {hasPermission("Export User") && (
               <Button variant="outline" onClick={() => window.location.href = safeRoute("users.export")}>
                 <Download className="mr-2 h-4 w-4" />
-                Export Excel
+                Export
               </Button>
             )}
 
@@ -84,7 +84,7 @@ export default function Index({ users: initialUsers }) {
             {hasPermission("Import User") && (
               <Button variant="outline" onClick={() => setOpenImport(true)}>
                 <Upload className="mr-2 h-4 w-4" />
-                Import Excel
+                Import
               </Button>
             )}
 

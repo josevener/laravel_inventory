@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react"
 import { Head, Link, router, usePage } from "@inertiajs/react"
-import { Plus, Package, AlertTriangle, Edit, Trash2, Search, SquareArrowOutUpRight, Package2Icon } from "lucide-react"
+import { Plus, Package, AlertTriangle, Edit, Trash2, Search, SquareArrowOutUpRight, Package2Icon, Upload, Download } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -17,6 +17,7 @@ import DeleteConfirmDialog from "@/Components/custom/DeleteConfirmDialog"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { useSafeRoute } from "@/hooks/useSafeRoute"
 import { EmptyState } from "@/Components/custom/EmptyState"
+import useHasPermission from "@/hooks/useHasPermission"
 
 export default function ProductsIndex({ products: initialProducts }) {
   const { auth } = usePage().props
@@ -24,8 +25,8 @@ export default function ProductsIndex({ products: initialProducts }) {
   const [deletingProduct, setDeletingProduct] = useState(null)
   const [searchInput, setSearchInput] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
-
-
+  const [openImport, setOpenImport] = useState(false)
+  const hasPermission = useHasPermission();
   const safeRoute = useSafeRoute()
 
   const isPosEnable = auth?.user?.client?.is_pos_enable ? true : false
@@ -111,6 +112,22 @@ export default function ProductsIndex({ products: initialProducts }) {
                 <Search className="h-4 w-4" />
               </Button>
             </div>
+
+            {/* Export Button */}
+            {hasPermission("Export User") && (
+              <Button variant="outline" onClick={() => window.location.href = safeRoute("products.export")}>
+                <Download className="mr-2 h-4 w-4" />
+                Export
+              </Button>
+            )}
+
+            {/* Import Button */}
+            {hasPermission("Import Product") && (
+              <Button variant="outline" onClick={() => setOpenImport(true)}>
+                <Upload className="mr-2 h-4 w-4" />
+                Import
+              </Button>
+            )}
 
             <Button asChild>
               <Link href={safeRoute("products.create")}>

@@ -174,7 +174,7 @@ export default function GatepassIndex({ gatePasses, filters, projects, type }) {
             </Card>
 
             {/* Table */}
-            <Card>
+            <Card className="max-h-[calc(100vh-390px)] overflow-auto">
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>

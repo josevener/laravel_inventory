@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProductsExport;
 use App\Models\Brand;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Unit;
 use App\Services\SkuService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Validators\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -426,5 +430,13 @@ class ProductController extends Controller
                 'reorder_level' => $p->reorder_level,
             ])
         );
+    }
+
+    public function export($client)
+    {
+        $timestamp = Carbon::now()->format('Y-m-d_H-i-s'); 
+        $fileName = "Product_Lists_{$timestamp}.xlsx";
+
+        return Excel::download(new ProductsExport, $fileName);
     }
 }
